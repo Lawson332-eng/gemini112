@@ -186,36 +186,69 @@ function get_app_button_styles() {
     }
     ?>
     <style>
-    /* 按钮容器布局 */
+    /* 按钮容器布局 - 并排显示 */
     .single-product .summary .button.alt {
-        display: inline-block;
+        display: inline-block !important;
         margin-right: 10px;
         margin-bottom: 10px;
         vertical-align: middle;
+        max-width: 180px;
+        white-space: nowrap;
     }
 
-    /* Get the App 按钮样式 */
+    /* Get the App 按钮样式 - 匹配Request Quote样式 */
     .single-product .summary .get-app-button {
-        background-color: #0073aa;
-        border-color: #0073aa;
-        color: #ffffff;
+        background-color: #FD6450 !important;
+        border: 2px solid #FD6450 !important;
+        border-radius: 4px;
+        color: #ffffff !important;
+        padding: 12px 24px;
+        font-size: 14px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
         margin-left: 0;
         transition: all 0.3s ease;
+        text-decoration: none;
+        line-height: 1.5;
     }
 
     .single-product .summary .get-app-button:hover {
-        background-color: #005a87;
-        border-color: #005a87;
+        background-color: #E5533F !important;
+        border-color: #E5533F !important;
+        color: #ffffff !important;
+        opacity: 0.9;
     }
 
-    /* 移动端响应式 */
+    /* 确保Request Quote按钮也保持并排 */
+    .single-product .summary .yith-ywraq-add-to-quote,
+    .single-product .summary .add-request-quote-button {
+        display: inline-block !important;
+        max-width: 180px;
+    }
+
+    /* 移动端响应式 - 竖排显示 */
     @media (max-width: 768px) {
         .single-product .summary .button.alt {
-            display: block;
+            display: block !important;
             width: 100%;
+            max-width: 100%;
             margin-right: 0;
             margin-bottom: 10px;
             text-align: center;
+        }
+
+        .single-product .summary .get-app-button {
+            width: 100%;
+        }
+    }
+
+    /* 小屏幕平板适配 */
+    @media (min-width: 769px) and (max-width: 1024px) {
+        .single-product .summary .button.alt {
+            max-width: 160px;
+            font-size: 13px;
+            padding: 10px 20px;
         }
     }
     </style>
