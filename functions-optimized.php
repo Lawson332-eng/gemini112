@@ -170,10 +170,21 @@ function prevent_yith_button_hide() {
 // ============================================
 // 4. Get the App 按钮 ⭐ 你的核心功能
 // ============================================
-add_action( 'woocommerce_single_product_summary', 'add_get_app_button', 36 );
+// 在 Request Quote 按钮后立即添加 Get the App 按钮
+add_action( 'woocommerce_single_product_summary', 'add_get_app_button', 32 );
 function add_get_app_button() {
     $app_url = 'https://apps.apple.com/us/app/yellowpal/id6754067632?l=zh-Hans-CN';
-    echo '<a href="' . esc_url($app_url) . '" class="button alt get-app-button" target="_blank" rel="noopener noreferrer">Get the App</a>';
+    ?>
+    <div class="custom-buttons-wrapper">
+        <a href="<?php echo esc_url($app_url); ?>" class="button alt get-app-button" target="_blank" rel="noopener noreferrer">Get the App</a>
+    </div>
+    <?php
+}
+
+// 隐藏 Add to Cart 按钮（如果不需要）
+add_action( 'woocommerce_single_product_summary', 'hide_add_to_cart_button', 1 );
+function hide_add_to_cart_button() {
+    remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 30 );
 }
 
 // ============================================
@@ -186,7 +197,19 @@ function get_app_button_styles() {
     }
     ?>
     <style>
-    /* 按钮容器布局 - 并排显示 */
+    /* 隐藏 Add to Cart 按钮 */
+    .single-product .summary form.cart {
+        display: none !important;
+    }
+
+    /* 按钮容器 - 确保并排显示 */
+    .single-product .summary .custom-buttons-wrapper,
+    .single-product .summary .yith-ywraq-add-button {
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    /* 通用按钮样式 */
     .single-product .summary .button.alt {
         display: inline-block !important;
         margin-right: 10px;
@@ -196,7 +219,7 @@ function get_app_button_styles() {
         white-space: nowrap;
     }
 
-    /* Get the App 按钮样式 - 匹配Request Quote样式 */
+    /* Get the App 按钮样式 */
     .single-product .summary .get-app-button {
         background-color: #FD6450 !important;
         border: 2px solid #FD6450 !important;
@@ -211,6 +234,7 @@ function get_app_button_styles() {
         transition: all 0.3s ease;
         text-decoration: none;
         line-height: 1.5;
+        box-sizing: border-box;
     }
 
     .single-product .summary .get-app-button:hover {
@@ -220,26 +244,28 @@ function get_app_button_styles() {
         opacity: 0.9;
     }
 
-    /* 确保Request Quote按钮也保持并排 */
+    /* 确保 Request Quote 按钮样式一致 */
     .single-product .summary .yith-ywraq-add-to-quote,
     .single-product .summary .add-request-quote-button {
         display: inline-block !important;
         max-width: 180px;
+        margin-right: 10px;
     }
 
     /* 移动端响应式 - 竖排显示 */
     @media (max-width: 768px) {
-        .single-product .summary .button.alt {
+        .single-product .summary .button.alt,
+        .single-product .summary .custom-buttons-wrapper {
             display: block !important;
             width: 100%;
             max-width: 100%;
             margin-right: 0;
             margin-bottom: 10px;
-            text-align: center;
         }
 
         .single-product .summary .get-app-button {
             width: 100%;
+            text-align: center;
         }
     }
 
