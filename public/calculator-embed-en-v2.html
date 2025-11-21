@@ -282,8 +282,28 @@
             };
         };
 
+        // ========== Currency Options ==========
+        const currencies = {
+            USD: { symbol: '$', name: 'US Dollar', position: 'before' },
+            CNY: { symbol: '¥', name: 'Chinese Yuan', position: 'before' },
+            EUR: { symbol: '€', name: 'Euro', position: 'before' },
+            GBP: { symbol: '£', name: 'British Pound', position: 'before' },
+            JPY: { symbol: '¥', name: 'Japanese Yen', position: 'before' },
+            KRW: { symbol: '₩', name: 'Korean Won', position: 'before' },
+            INR: { symbol: '₹', name: 'Indian Rupee', position: 'before' },
+            AUD: { symbol: 'A$', name: 'Australian Dollar', position: 'before' },
+            CAD: { symbol: 'C$', name: 'Canadian Dollar', position: 'before' },
+            SGD: { symbol: 'S$', name: 'Singapore Dollar', position: 'before' },
+            HKD: { symbol: 'HK$', name: 'Hong Kong Dollar', position: 'before' },
+            THB: { symbol: '฿', name: 'Thai Baht', position: 'before' },
+            VND: { symbol: '₫', name: 'Vietnamese Dong', position: 'after' },
+            MYR: { symbol: 'RM', name: 'Malaysian Ringgit', position: 'before' },
+            PHP: { symbol: '₱', name: 'Philippine Peso', position: 'before' }
+        };
+
         // ========== Default Parameters ==========
         const defaultParams = {
+            currency: 'USD',
             sites: 100,
             ordersPerSite: 2.2,
             pricePerOrder: 15,
@@ -305,6 +325,7 @@
         const scenarios = {
             conservative: {
                 name: 'Conservative',
+                currency: 'USD',
                 sites: 50,
                 ordersPerSite: 1.5,
                 pricePerOrder: 12,
@@ -324,6 +345,7 @@
             standard: defaultParams,
             optimistic: {
                 name: 'Optimistic',
+                currency: 'USD',
                 sites: 200,
                 ordersPerSite: 3.5,
                 pricePerOrder: 18,
@@ -355,7 +377,12 @@
             }, [params]);
 
             const updateParam = (key, value) => {
-                setParams(prev => ({ ...prev, [key]: parseFloat(value) || 0 }));
+                // Handle currency as string, numbers as parsed floats
+                if (key === 'currency') {
+                    setParams(prev => ({ ...prev, [key]: value }));
+                } else {
+                    setParams(prev => ({ ...prev, [key]: parseFloat(value) || 0 }));
+                }
             };
 
             const loadScenario = (scenario) => {
@@ -371,7 +398,14 @@
             };
 
             const formatCurrency = (num) => {
-                return '$' + formatNumber(num, 2);
+                const currencyInfo = currencies[params.currency] || currencies.USD;
+                const formatted = formatNumber(num, 2);
+
+                if (currencyInfo.position === 'after') {
+                    return formatted + currencyInfo.symbol;
+                } else {
+                    return currencyInfo.symbol + formatted;
+                }
             };
 
             const getPaybackRating = (months) => {
@@ -465,6 +499,24 @@
                                 Basic Parameters
                             </h3>
 
+                            {/* Currency Selector */}
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Currency
+                                </label>
+                                <select
+                                    value={params.currency}
+                                    onChange={(e) => updateParam('currency', e.target.value)}
+                                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg input-focus transition bg-white"
+                                >
+                                    {Object.entries(currencies).map(([code, info]) => (
+                                        <option key={code} value={code}>
+                                            {info.symbol} {code} - {info.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
                             <InputField
                                 label="Number of Stations"
                                 value={params.sites}
@@ -488,7 +540,7 @@
                                 label="Price per Rental"
                                 value={params.pricePerOrder}
                                 onChange={(v) => updateParam('pricePerOrder', v)}
-                                unit="$"
+                                unit={currencies[params.currency]?.symbol || '$'}
                                 step="0.5"
                                 min="0.5"
                                 max="100"
@@ -498,7 +550,7 @@
                                 label="Device Cost per Station"
                                 value={params.deviceCost}
                                 onChange={(v) => updateParam('deviceCost', v)}
-                                unit="$"
+                                unit={currencies[params.currency]?.symbol || '$'}
                                 min="100"
                                 max="50000"
                             />
@@ -540,21 +592,21 @@
                                         label="Logistics Cost per Station"
                                         value={params.logisticsCost}
                                         onChange={(v) => updateParam('logisticsCost', v)}
-                                        unit="$"
+                                        unit={currencies[params.currency]?.symbol || '$'}
                                     />
 
                                     <InputField
                                         label="Software License Fee"
                                         value={params.softwareLicense}
                                         onChange={(v) => updateParam('softwareLicense', v)}
-                                        unit="$"
+                                        unit={currencies[params.currency]?.symbol || '$'}
                                     />
 
                                     <InputField
                                         label="Marketing Budget"
                                         value={params.marketingCost}
                                         onChange={(v) => updateParam('marketingCost', v)}
-                                        unit="$"
+                                        unit={currencies[params.currency]?.symbol || '$'}
                                     />
 
                                     <InputField
@@ -577,28 +629,28 @@
                                         label="Daily Labor Cost"
                                         value={params.dailyLaborCost}
                                         onChange={(v) => updateParam('dailyLaborCost', v)}
-                                        unit="$"
+                                        unit={currencies[params.currency]?.symbol || '$'}
                                     />
 
                                     <InputField
                                         label="Daily Communication Cost"
                                         value={params.dailyCommCost}
                                         onChange={(v) => updateParam('dailyCommCost', v)}
-                                        unit="$"
+                                        unit={currencies[params.currency]?.symbol || '$'}
                                     />
 
                                     <InputField
                                         label="Daily Maintenance Cost"
                                         value={params.dailyMaintenanceCost}
                                         onChange={(v) => updateParam('dailyMaintenanceCost', v)}
-                                        unit="$"
+                                        unit={currencies[params.currency]?.symbol || '$'}
                                     />
 
                                     <InputField
                                         label="Device Wear Cost per Order"
                                         value={params.deviceWearCost}
                                         onChange={(v) => updateParam('deviceWearCost', v)}
-                                        unit="$/order"
+                                        unit={(currencies[params.currency]?.symbol || '$') + '/order'}
                                         step="0.01"
                                     />
 
