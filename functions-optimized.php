@@ -171,12 +171,33 @@ function prevent_yith_button_hide() {
 // 4. Get the App 按钮 ⭐ 你的核心功能
 // ============================================
 // 在 YITH Request Quote 按钮后立即添加 Get the App 按钮
-// YITH 按钮在 priority 35，所以我们用 36
-add_action( 'woocommerce_single_product_summary', 'add_get_app_button', 36 );
-function add_get_app_button() {
+add_action( 'woocommerce_after_add_to_cart_form', 'add_get_app_button_wrapper', 10 );
+function add_get_app_button_wrapper() {
     $app_url = 'https://apps.apple.com/us/app/yellowpal/id6754067632?l=zh-Hans-CN';
     ?>
-    <a href="<?php echo esc_url($app_url); ?>" class="button alt get-app-button" target="_blank" rel="noopener noreferrer">Get the App</a>
+    <!-- 按钮容器 -->
+    <div class="custom-product-buttons-container">
+        <a href="<?php echo esc_url($app_url); ?>" class="button alt get-app-button" target="_blank" rel="noopener noreferrer">Get the App</a>
+    </div>
+
+    <script type="text/javascript">
+    jQuery(document).ready(function($) {
+        // 等待页面完全加载
+        setTimeout(function() {
+            // 查找 YITH Request Quote 按钮
+            var $yithButton = $('.yith-ywraq-add-to-quote, .add-request-quote-button, .yith-ywraq-add-button').first();
+            var $container = $('.custom-product-buttons-container');
+
+            if ($yithButton.length && $container.length) {
+                // 将 YITH 按钮移动到容器的最前面
+                $container.prepend($yithButton);
+
+                // 确保容器可见
+                $container.show().css('display', 'flex');
+            }
+        }, 500);
+    });
+    </script>
     <?php
 }
 
@@ -200,17 +221,18 @@ function get_app_button_styles() {
         display: none !important;
     }
 
-    /* YITH 按钮和 Get the App 按钮容器 - 确保并排显示 */
-    .single-product .summary .yith-ywraq-add-button,
-    .single-product .summary .get-app-button {
-        display: inline-block !important;
-        vertical-align: middle;
-        margin-right: 10px;
-        margin-bottom: 10px;
+    /* 按钮容器 - 使用 Flexbox 确保并排显示 */
+    .custom-product-buttons-container {
+        display: flex !important;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        margin-top: 20px;
+        margin-bottom: 20px;
     }
 
-    /* Get the App 按钮样式 - 与 Request Quote 匹配 */
-    .single-product .summary .get-app-button {
+    /* Get the App 按钮样式 */
+    .custom-product-buttons-container .get-app-button {
         background-color: #FD6450 !important;
         border: 2px solid #FD6450 !important;
         border-radius: 4px;
@@ -220,52 +242,60 @@ function get_app_button_styles() {
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        margin-left: 0;
         transition: all 0.3s ease;
-        text-decoration: none;
+        text-decoration: none !important;
         line-height: 1.5;
         box-sizing: border-box;
-        max-width: 180px;
         white-space: nowrap;
+        flex: 0 0 auto;
+        margin: 0 !important;
     }
 
-    .single-product .summary .get-app-button:hover {
+    .custom-product-buttons-container .get-app-button:hover {
         background-color: #E5533F !important;
         border-color: #E5533F !important;
         color: #ffffff !important;
         opacity: 0.9;
     }
 
-    /* 确保 YITH Request Quote 按钮样式正确 */
-    .single-product .summary .yith-ywraq-add-to-quote,
-    .single-product .summary .add-request-quote-button {
+    /* YITH Request Quote 按钮在容器内的样式 */
+    .custom-product-buttons-container .yith-ywraq-add-to-quote,
+    .custom-product-buttons-container .add-request-quote-button,
+    .custom-product-buttons-container .yith-ywraq-add-button {
+        flex: 0 0 auto;
+        margin: 0 !important;
         display: inline-block !important;
-        max-width: 180px;
-        margin-right: 10px;
-        margin-bottom: 10px;
-        vertical-align: middle;
     }
 
-    /* 移动端响应式 - 竖排显示 */
+    /* 确保 YITH 按钮默认可见 */
+    .yith-ywraq-add-to-quote,
+    .add-request-quote-button,
+    .yith-ywraq-add-button {
+        display: inline-block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    /* 移动端响应式 - 按钮竖排且全宽 */
     @media (max-width: 768px) {
-        .single-product .summary .yith-ywraq-add-button,
-        .single-product .summary .get-app-button,
-        .single-product .summary .yith-ywraq-add-to-quote,
-        .single-product .summary .add-request-quote-button {
-            display: block !important;
+        .custom-product-buttons-container {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .custom-product-buttons-container .get-app-button,
+        .custom-product-buttons-container .yith-ywraq-add-to-quote,
+        .custom-product-buttons-container .add-request-quote-button {
             width: 100%;
-            max-width: 100%;
-            margin-right: 0;
-            margin-bottom: 10px;
             text-align: center;
+            flex: 1 1 auto;
         }
     }
 
     /* 小屏幕平板适配 */
     @media (min-width: 769px) and (max-width: 1024px) {
-        .single-product .summary .get-app-button,
-        .single-product .summary .yith-ywraq-add-to-quote {
-            max-width: 160px;
+        .custom-product-buttons-container .get-app-button,
+        .custom-product-buttons-container .yith-ywraq-add-to-quote {
             font-size: 13px;
             padding: 10px 20px;
         }
