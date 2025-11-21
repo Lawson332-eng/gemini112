@@ -170,21 +170,14 @@ function prevent_yith_button_hide() {
 // ============================================
 // 4. Get the App 按钮 ⭐ 你的核心功能
 // ============================================
-// 在 Request Quote 按钮后立即添加 Get the App 按钮
-add_action( 'woocommerce_single_product_summary', 'add_get_app_button', 32 );
+// 在 YITH Request Quote 按钮后立即添加 Get the App 按钮
+// YITH 按钮在 priority 35，所以我们用 36
+add_action( 'woocommerce_single_product_summary', 'add_get_app_button', 36 );
 function add_get_app_button() {
     $app_url = 'https://apps.apple.com/us/app/yellowpal/id6754067632?l=zh-Hans-CN';
     ?>
-    <div class="custom-buttons-wrapper">
-        <a href="<?php echo esc_url($app_url); ?>" class="button alt get-app-button" target="_blank" rel="noopener noreferrer">Get the App</a>
-    </div>
+    <a href="<?php echo esc_url($app_url); ?>" class="button alt get-app-button" target="_blank" rel="noopener noreferrer">Get the App</a>
     <?php
-}
-
-// 隐藏 Add to Cart 按钮（如果不需要）
-add_action( 'woocommerce_single_product_summary', 'hide_add_to_cart_button', 1 );
-function hide_add_to_cart_button() {
-    remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 30 );
 }
 
 // ============================================
@@ -197,29 +190,26 @@ function get_app_button_styles() {
     }
     ?>
     <style>
-    /* 隐藏 Add to Cart 按钮 */
-    .single-product .summary form.cart {
+    /* 只隐藏 Add to Cart 按钮，保留 form */
+    .single-product .summary form.cart .single_add_to_cart_button {
         display: none !important;
     }
 
-    /* 按钮容器 - 确保并排显示 */
-    .single-product .summary .custom-buttons-wrapper,
-    .single-product .summary .yith-ywraq-add-button {
-        display: inline-block;
-        vertical-align: middle;
+    /* 隐藏数量选择器 */
+    .single-product .summary form.cart .quantity {
+        display: none !important;
     }
 
-    /* 通用按钮样式 */
-    .single-product .summary .button.alt {
+    /* YITH 按钮和 Get the App 按钮容器 - 确保并排显示 */
+    .single-product .summary .yith-ywraq-add-button,
+    .single-product .summary .get-app-button {
         display: inline-block !important;
+        vertical-align: middle;
         margin-right: 10px;
         margin-bottom: 10px;
-        vertical-align: middle;
-        max-width: 180px;
-        white-space: nowrap;
     }
 
-    /* Get the App 按钮样式 */
+    /* Get the App 按钮样式 - 与 Request Quote 匹配 */
     .single-product .summary .get-app-button {
         background-color: #FD6450 !important;
         border: 2px solid #FD6450 !important;
@@ -235,6 +225,8 @@ function get_app_button_styles() {
         text-decoration: none;
         line-height: 1.5;
         box-sizing: border-box;
+        max-width: 180px;
+        white-space: nowrap;
     }
 
     .single-product .summary .get-app-button:hover {
@@ -244,34 +236,35 @@ function get_app_button_styles() {
         opacity: 0.9;
     }
 
-    /* 确保 Request Quote 按钮样式一致 */
+    /* 确保 YITH Request Quote 按钮样式正确 */
     .single-product .summary .yith-ywraq-add-to-quote,
     .single-product .summary .add-request-quote-button {
         display: inline-block !important;
         max-width: 180px;
         margin-right: 10px;
+        margin-bottom: 10px;
+        vertical-align: middle;
     }
 
     /* 移动端响应式 - 竖排显示 */
     @media (max-width: 768px) {
-        .single-product .summary .button.alt,
-        .single-product .summary .custom-buttons-wrapper {
+        .single-product .summary .yith-ywraq-add-button,
+        .single-product .summary .get-app-button,
+        .single-product .summary .yith-ywraq-add-to-quote,
+        .single-product .summary .add-request-quote-button {
             display: block !important;
             width: 100%;
             max-width: 100%;
             margin-right: 0;
             margin-bottom: 10px;
-        }
-
-        .single-product .summary .get-app-button {
-            width: 100%;
             text-align: center;
         }
     }
 
     /* 小屏幕平板适配 */
     @media (min-width: 769px) and (max-width: 1024px) {
-        .single-product .summary .button.alt {
+        .single-product .summary .get-app-button,
+        .single-product .summary .yith-ywraq-add-to-quote {
             max-width: 160px;
             font-size: 13px;
             padding: 10px 20px;
