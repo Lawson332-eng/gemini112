@@ -173,11 +173,13 @@ function prevent_yith_button_hide() {
 // 在 YITH Request Quote 按钮后立即添加 Get the App 按钮
 add_action( 'woocommerce_after_add_to_cart_form', 'add_get_app_button_wrapper', 10 );
 function add_get_app_button_wrapper() {
-    $app_url = 'https://apps.apple.com/us/app/yellowpal/id6754067632?l=zh-Hans-CN';
+    $ios_app_url = 'https://apps.apple.com/us/app/yellowpal/id6754067632?l=zh-Hans-CN';
+    $android_app_url = 'https://play.google.com/store/apps/details?id=vn.pinbus.app&hl=vi';
     ?>
     <!-- 按钮容器 -->
     <div class="custom-product-buttons-container">
-        <a href="<?php echo esc_url($app_url); ?>" class="button alt get-app-button" target="_blank" rel="noopener noreferrer">Get the App</a>
+        <a href="<?php echo esc_url($ios_app_url); ?>" class="button alt get-app-button ios-app-button" target="_blank" rel="noopener noreferrer">Get the App</a>
+        <a href="<?php echo esc_url($android_app_url); ?>" class="button alt get-app-button android-app-button" target="_blank" rel="noopener noreferrer">安卓版本</a>
     </div>
 
     <script type="text/javascript">
@@ -273,16 +275,30 @@ function get_app_button_styles() {
         justify-content: center !important;
     }
 
-    /* Get the App 按钮颜色 */
-    .custom-product-buttons-container .get-app-button {
+    /* iOS Get the App 按钮颜色 */
+    .custom-product-buttons-container .ios-app-button {
         background-color: #FD6450 !important;
         border-color: #FD6450 !important;
         color: #ffffff !important;
     }
 
-    .custom-product-buttons-container .get-app-button:hover {
+    .custom-product-buttons-container .ios-app-button:hover {
         background-color: #E5533F !important;
         border-color: #E5533F !important;
+        color: #ffffff !important;
+        opacity: 0.95;
+    }
+
+    /* Android 安卓版本按钮颜色 */
+    .custom-product-buttons-container .android-app-button {
+        background-color: #3DDC84 !important;
+        border-color: #3DDC84 !important;
+        color: #ffffff !important;
+    }
+
+    .custom-product-buttons-container .android-app-button:hover {
+        background-color: #2DBE6C !important;
+        border-color: #2DBE6C !important;
         color: #ffffff !important;
         opacity: 0.95;
     }
@@ -352,7 +368,8 @@ function get_app_button_styles() {
             align-items: stretch;
         }
 
-        .custom-product-buttons-container .get-app-button,
+        .custom-product-buttons-container .ios-app-button,
+        .custom-product-buttons-container .android-app-button,
         .custom-product-buttons-container .yith-ywraq-add-to-quote,
         .custom-product-buttons-container .add-request-quote-button {
             width: 100%;
@@ -363,10 +380,11 @@ function get_app_button_styles() {
 
     /* 小屏幕平板适配 */
     @media (min-width: 769px) and (max-width: 1024px) {
-        .custom-product-buttons-container .get-app-button,
+        .custom-product-buttons-container .ios-app-button,
+        .custom-product-buttons-container .android-app-button,
         .custom-product-buttons-container .yith-ywraq-add-to-quote {
             font-size: 13px;
-            padding: 10px 20px;
+            padding: 10px 18px;
         }
     }
     </style>
