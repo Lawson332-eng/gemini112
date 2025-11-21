@@ -231,40 +231,62 @@ function get_app_button_styles() {
         margin-bottom: 20px;
     }
 
-    /* Get the App 按钮样式 */
-    .custom-product-buttons-container .get-app-button {
-        background-color: #FD6450 !important;
-        border: 2px solid #FD6450 !important;
-        border-radius: 4px;
-        color: #ffffff !important;
-        padding: 12px 24px;
-        font-size: 14px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        transition: all 0.3s ease;
-        text-decoration: none !important;
-        line-height: 1.5;
-        box-sizing: border-box;
-        white-space: nowrap;
+    /* 统一按钮基础样式 */
+    .custom-product-buttons-container .get-app-button,
+    .custom-product-buttons-container .yith-ywraq-add-to-quote,
+    .custom-product-buttons-container .add-request-quote-button,
+    .custom-product-buttons-container .yith-ywraq-add-button {
+        /* 统一边框 */
+        border: 2px solid !important;
+        border-radius: 4px !important;
+
+        /* 统一内边距 */
+        padding: 12px 28px !important;
+
+        /* 统一字体 */
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        line-height: 1.5 !important;
+
+        /* 统一布局 */
+        box-sizing: border-box !important;
+        white-space: nowrap !important;
         flex: 0 0 auto;
         margin: 0 !important;
+        display: inline-block !important;
+        text-decoration: none !important;
+
+        /* 统一过渡效果 */
+        transition: all 0.3s ease !important;
+
+        /* 统一高度 */
+        min-height: 48px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    /* Get the App 按钮颜色 */
+    .custom-product-buttons-container .get-app-button {
+        background-color: #FD6450 !important;
+        border-color: #FD6450 !important;
+        color: #ffffff !important;
     }
 
     .custom-product-buttons-container .get-app-button:hover {
         background-color: #E5533F !important;
         border-color: #E5533F !important;
         color: #ffffff !important;
-        opacity: 0.9;
+        opacity: 0.95;
     }
 
-    /* YITH Request Quote 按钮在容器内的样式 */
+    /* Request Quote 按钮保持原有蓝色 */
     .custom-product-buttons-container .yith-ywraq-add-to-quote,
     .custom-product-buttons-container .add-request-quote-button,
     .custom-product-buttons-container .yith-ywraq-add-button {
-        flex: 0 0 auto;
-        margin: 0 !important;
-        display: inline-block !important;
+        /* 保持主题原有颜色，只统一尺寸和边框 */
     }
 
     /* 确保 YITH 按钮默认可见 */
