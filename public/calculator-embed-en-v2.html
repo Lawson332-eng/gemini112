@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power Bank Sharing ROI Calculator - Embedded Version</title>
+    <meta name="description" content="Professional power bank sharing investment ROI calculator - Calculate your return on investment, payback period, and profitability">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+    <!-- Babel Standalone for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- jsPDF for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- html2canvas for image capture -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <!-- SheetJS for Excel export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #E6F0EC;
+            margin: 0;
+            padding: 0;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #070346 0%, #0a0557 100%);
+        }
+
+        .gradient-accent {
+            background: linear-gradient(135deg, #FD6450 0%, #ff8570 100%);
+        }
+
+        .card-shadow {
+            box-shadow: 0 5px 15px rgba(7, 3, 70, 0.1);
+        }
+
+        .input-focus:focus {
+            outline: none;
+            border-color: #070346;
+            box-shadow: 0 0 0 3px rgba(7, 3, 70, 0.1);
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .metric-card {
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(7, 3, 70, 0.15);
+        }
+
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            opacity: 1;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #FD6450 0%, #ff8570 100%);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(253, 100, 80, 0.4);
+        }
+
+        .badge-excellent { background: #10b981; color: white; }
+        .badge-good { background: #3b82f6; color: white; }
+        .badge-average { background: #f59e0b; color: white; }
+        .badge-poor { background: #ef4444; color: white; }
+
+        /* Scenario buttons - fixed alignment */
+        .scenario-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            text-align: center;
+            white-space: nowrap;
+            font-size: 13px;
+        }
+
+        @media (max-width: 640px) {
+            .scenario-btn {
+                font-size: 12px;
+                min-height: 40px;
+                padding: 8px 10px;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #070346;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #0a0557;
+        }
+
+        /* Export notification */
+        .export-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 16px 24px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#070346',
+                        secondary: '#FD6450',
+                        background: '#E6F0EC',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background">
+    <div id="root" class="py-8"></div>
+    <div id="notification-container"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // ========== Notification Component ==========
+        function showNotification(message, type = 'success') {
+            const container = document.getElementById('notification-container');
+            const notification = document.createElement('div');
+            notification.className = 'export-notification';
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 24px;">${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
+                    <div>
+                        <div style="font-weight: 600; color: #070346; margin-bottom: 4px;">
+                            ${type === 'success' ? 'Success!' : type === 'error' ? 'Error' : 'Info'}
+                        </div>
+                        <div style="color: #666; font-size: 14px;">${message}</div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.animation = 'slideIn 0.3s ease-out reverse';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // ========== Calculation Engine ==========
+        const calculateROI = (params) => {
+            // Basic parameters
+            const sites = params.sites || 0;
+            const ordersPerSite = params.ordersPerSite || 0;
+            const pricePerOrder = params.pricePerOrder || 0;
+            const deviceCost = params.deviceCost || 0;
+            const venueCommission = params.venueCommission || 0;
+
+            // Advanced parameters
+            const logisticsCost = params.logisticsCost || 0;
+            const softwareLicense = params.softwareLicense || 0;
+            const marketingCost = params.marketingCost || 0;
+            const paymentFee = params.paymentFee || 0;
+            const supplierCommission = params.supplierCommission || 0;
+            const dailyLaborCost = params.dailyLaborCost || 0;
+            const dailyCommCost = params.dailyCommCost || 0;
+            const dailyMaintenanceCost = params.dailyMaintenanceCost || 0;
+            const deviceWearCost = params.deviceWearCost || 0;
+            const operatingDays = params.operatingDays || 365;
+
+            // Revenue calculation
+            const dailyOrders = sites * ordersPerSite;
+            const dailyRevenue = dailyOrders * pricePerOrder;
+            const monthlyRevenue = dailyRevenue * 30;
+            const yearlyRevenue = dailyRevenue * operatingDays;
+
+            // Cost calculation
+            const initialInvestment = (deviceCost + logisticsCost) * sites + softwareLicense + marketingCost;
+            const dailyOperatingCost = dailyLaborCost + dailyCommCost + dailyMaintenanceCost + (deviceWearCost * dailyOrders);
+            const monthlyOperatingCost = dailyOperatingCost * 30;
+            const yearlyOperatingCost = dailyOperatingCost * operatingDays;
+
+            // Profit calculation
+            const totalCommissionRate = (venueCommission + supplierCommission + paymentFee) / 100;
+            const dailyGrossIncome = dailyRevenue * (1 - totalCommissionRate);
+            const dailyNetProfit = dailyGrossIncome - dailyOperatingCost;
+            const monthlyNetProfit = dailyNetProfit * 30;
+            const yearlyNetProfit = dailyNetProfit * operatingDays;
+
+            // Key metrics
+            const paybackPeriodDays = dailyNetProfit > 0 ? initialInvestment / dailyNetProfit : Infinity;
+            const paybackPeriodMonths = paybackPeriodDays / 30;
+            const annualROI = initialInvestment > 0 ? (yearlyNetProfit / initialInvestment) * 100 : 0;
+            const grossMargin = dailyRevenue > 0 ? (dailyGrossIncome / dailyRevenue) * 100 : 0;
+            const netMargin = dailyRevenue > 0 ? (dailyNetProfit / dailyRevenue) * 100 : 0;
+            const breakEvenPoint = pricePerOrder > 0 ? (dailyOperatingCost + (dailyRevenue * totalCommissionRate)) / pricePerOrder : 0;
+
+            return {
+                revenue: {
+                    daily: dailyRevenue,
+                    monthly: monthlyRevenue,
+                    yearly: yearlyRevenue,
+                    dailyOrders
+                },
+                costs: {
+                    initial: initialInvestment,
+                    dailyOperating: dailyOperatingCost,
+                    monthlyOperating: monthlyOperatingCost,
+                    yearlyOperating: yearlyOperatingCost
+                },
+                profit: {
+                    dailyGross: dailyGrossIncome,
+                    dailyNet: dailyNetProfit,
+                    monthlyNet: monthlyNetProfit,
+                    yearlyNet: yearlyNetProfit
+                },
+                metrics: {
+                    paybackPeriodDays,
+                    paybackPeriodMonths,
+                    annualROI,
+                    grossMargin,
+                    netMargin,
+                    breakEvenPoint
+                }
+            };
+        };
+
+        // ========== Default Parameters ==========
+        const defaultParams = {
+            sites: 100,
+            ordersPerSite: 2.2,
+            pricePerOrder: 15,
+            deviceCost: 2500,
+            venueCommission: 20,
+            logisticsCost: 500,
+            softwareLicense: 50000,
+            marketingCost: 0,
+            paymentFee: 3,
+            supplierCommission: 0,
+            dailyLaborCost: 500,
+            dailyCommCost: 80,
+            dailyMaintenanceCost: 40,
+            deviceWearCost: 0.15,
+            operatingDays: 365
+        };
+
+        // Scenario presets
+        const scenarios = {
+            conservative: {
+                name: 'Conservative',
+                sites: 50,
+                ordersPerSite: 1.5,
+                pricePerOrder: 12,
+                deviceCost: 3000,
+                venueCommission: 30,
+                logisticsCost: 600,
+                softwareLicense: 50000,
+                marketingCost: 20000,
+                paymentFee: 3,
+                supplierCommission: 5,
+                dailyLaborCost: 600,
+                dailyCommCost: 100,
+                dailyMaintenanceCost: 50,
+                deviceWearCost: 0.2,
+                operatingDays: 365
+            },
+            standard: defaultParams,
+            optimistic: {
+                name: 'Optimistic',
+                sites: 200,
+                ordersPerSite: 3.5,
+                pricePerOrder: 18,
+                deviceCost: 2000,
+                venueCommission: 15,
+                logisticsCost: 400,
+                softwareLicense: 50000,
+                marketingCost: 0,
+                paymentFee: 2.5,
+                supplierCommission: 0,
+                dailyLaborCost: 400,
+                dailyCommCost: 60,
+                dailyMaintenanceCost: 30,
+                deviceWearCost: 0.1,
+                operatingDays: 365
+            }
+        };
+
+        // ========== Main App Component ==========
+        function App() {
+            const [params, setParams] = useState(defaultParams);
+            const [results, setResults] = useState(null);
+            const [showAdvanced, setShowAdvanced] = useState(false);
+            const [activeTab, setActiveTab] = useState('overview');
+
+            useEffect(() => {
+                const calculated = calculateROI(params);
+                setResults(calculated);
+            }, [params]);
+
+            const updateParam = (key, value) => {
+                setParams(prev => ({ ...prev, [key]: parseFloat(value) || 0 }));
+            };
+
+            const loadScenario = (scenario) => {
+                setParams(scenarios[scenario]);
+            };
+
+            const formatNumber = (num, decimals = 0) => {
+                if (!isFinite(num)) return '∞';
+                return num.toLocaleString('en-US', {
+                    minimumFractionDigits: decimals,
+                    maximumFractionDigits: decimals
+                });
+            };
+
+            const formatCurrency = (num) => {
+                return '$' + formatNumber(num, 2);
+            };
+
+            const getPaybackRating = (months) => {
+                if (!isFinite(months)) return { text: 'Not Viable', color: 'poor' };
+                if (months <= 6) return { text: 'Excellent', color: 'excellent' };
+                if (months <= 12) return { text: 'Good', color: 'good' };
+                if (months <= 24) return { text: 'Average', color: 'average' };
+                return { text: 'Poor', color: 'poor' };
+            };
+
+            return (
+                <div className="min-h-screen">
+                    {/* Title Section */}
+                    <div className="gradient-bg text-white py-6 mb-8 rounded-lg shadow-lg">
+                        <div className="container mx-auto px-4">
+                            <h1 className="text-3xl md:text-4xl font-bold mb-2">Power Bank Sharing ROI Calculator</h1>
+                            <p className="text-white/80">Professional Investment Analysis Tool - Data-Driven Decisions</p>
+                        </div>
+                    </div>
+
+                    {/* Main Content */}
+                    <div className="container mx-auto px-4">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            {/* Left: Parameters Input */}
+                            <div className="lg:col-span-1">
+                                <ParameterInput
+                                    params={params}
+                                    updateParam={updateParam}
+                                    showAdvanced={showAdvanced}
+                                    setShowAdvanced={setShowAdvanced}
+                                    loadScenario={loadScenario}
+                                />
+                            </div>
+
+                            {/* Right: Results Display */}
+                            <div className="lg:col-span-2">
+                                {results && (
+                                    <ResultsDisplay
+                                        results={results}
+                                        params={params}
+                                        formatNumber={formatNumber}
+                                        formatCurrency={formatCurrency}
+                                        getPaybackRating={getPaybackRating}
+                                        activeTab={activeTab}
+                                        setActiveTab={setActiveTab}
+                                    />
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // ========== Parameter Input Component ==========
+        function ParameterInput({ params, updateParam, showAdvanced, setShowAdvanced, loadScenario }) {
+            return (
+                <div className="bg-white rounded-xl card-shadow p-6 animate-fade-in sticky top-4">
+                    <h2 className="text-2xl font-bold mb-6 text-primary">Parameter Settings</h2>
+
+                    {/* Scenario Presets - Fixed alignment */}
+                    <div className="mb-6">
+                        <label className="block text-sm font-semibold text-gray-700 mb-3">Quick Scenarios</label>
+                        <div className="grid grid-cols-3 gap-2">
+                            <button
+                                onClick={() => loadScenario('conservative')}
+                                className="scenario-btn px-3 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition font-medium"
+                            >
+                                Conservative
+                            </button>
+                            <button
+                                onClick={() => loadScenario('standard')}
+                                className="scenario-btn px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition font-medium"
+                            >
+                                Standard
+                            </button>
+                            <button
+                                onClick={() => loadScenario('optimistic')}
+                                className="scenario-btn px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition font-medium"
+                            >
+                                Optimistic
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="space-y-4">
+                        {/* Basic Parameters */}
+                        <div className="pb-4 border-b border-gray-200">
+                            <h3 className="font-semibold text-gray-700 mb-4 flex items-center">
+                                <span className="w-2 h-2 bg-primary rounded-full mr-2"></span>
+                                Basic Parameters
+                            </h3>
+
+                            <InputField
+                                label="Number of Stations"
+                                value={params.sites}
+                                onChange={(v) => updateParam('sites', v)}
+                                unit="units"
+                                min="1"
+                                max="10000"
+                            />
+
+                            <InputField
+                                label="Daily Orders per Station"
+                                value={params.ordersPerSite}
+                                onChange={(v) => updateParam('ordersPerSite', v)}
+                                unit="orders"
+                                step="0.1"
+                                min="0.1"
+                                max="100"
+                            />
+
+                            <InputField
+                                label="Price per Rental"
+                                value={params.pricePerOrder}
+                                onChange={(v) => updateParam('pricePerOrder', v)}
+                                unit="$"
+                                step="0.5"
+                                min="0.5"
+                                max="100"
+                            />
+
+                            <InputField
+                                label="Device Cost per Station"
+                                value={params.deviceCost}
+                                onChange={(v) => updateParam('deviceCost', v)}
+                                unit="$"
+                                min="100"
+                                max="50000"
+                            />
+
+                            <InputField
+                                label="Venue Commission Rate"
+                                value={params.venueCommission}
+                                onChange={(v) => updateParam('venueCommission', v)}
+                                unit="%"
+                                step="1"
+                                min="0"
+                                max="80"
+                            />
+                        </div>
+
+                        {/* Advanced Parameters */}
+                        <div>
+                            <button
+                                onClick={() => setShowAdvanced(!showAdvanced)}
+                                className="w-full flex items-center justify-between py-2 text-primary hover:text-secondary transition font-semibold"
+                            >
+                                <span className="flex items-center">
+                                    <span className="w-2 h-2 bg-secondary rounded-full mr-2"></span>
+                                    Advanced Parameters
+                                </span>
+                                <svg
+                                    className={`w-5 h-5 transition-transform ${showAdvanced ? 'rotate-180' : ''}`}
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+
+                            {showAdvanced && (
+                                <div className="mt-4 space-y-4 animate-fade-in">
+                                    <InputField
+                                        label="Logistics Cost per Station"
+                                        value={params.logisticsCost}
+                                        onChange={(v) => updateParam('logisticsCost', v)}
+                                        unit="$"
+                                    />
+
+                                    <InputField
+                                        label="Software License Fee"
+                                        value={params.softwareLicense}
+                                        onChange={(v) => updateParam('softwareLicense', v)}
+                                        unit="$"
+                                    />
+
+                                    <InputField
+                                        label="Marketing Budget"
+                                        value={params.marketingCost}
+                                        onChange={(v) => updateParam('marketingCost', v)}
+                                        unit="$"
+                                    />
+
+                                    <InputField
+                                        label="Payment Processing Fee"
+                                        value={params.paymentFee}
+                                        onChange={(v) => updateParam('paymentFee', v)}
+                                        unit="%"
+                                        step="0.1"
+                                    />
+
+                                    <InputField
+                                        label="Supplier Commission Rate"
+                                        value={params.supplierCommission}
+                                        onChange={(v) => updateParam('supplierCommission', v)}
+                                        unit="%"
+                                        step="1"
+                                    />
+
+                                    <InputField
+                                        label="Daily Labor Cost"
+                                        value={params.dailyLaborCost}
+                                        onChange={(v) => updateParam('dailyLaborCost', v)}
+                                        unit="$"
+                                    />
+
+                                    <InputField
+                                        label="Daily Communication Cost"
+                                        value={params.dailyCommCost}
+                                        onChange={(v) => updateParam('dailyCommCost', v)}
+                                        unit="$"
+                                    />
+
+                                    <InputField
+                                        label="Daily Maintenance Cost"
+                                        value={params.dailyMaintenanceCost}
+                                        onChange={(v) => updateParam('dailyMaintenanceCost', v)}
+                                        unit="$"
+                                    />
+
+                                    <InputField
+                                        label="Device Wear Cost per Order"
+                                        value={params.deviceWearCost}
+                                        onChange={(v) => updateParam('deviceWearCost', v)}
+                                        unit="$/order"
+                                        step="0.01"
+                                    />
+
+                                    <InputField
+                                        label="Operating Days per Year"
+                                        value={params.operatingDays}
+                                        onChange={(v) => updateParam('operatingDays', v)}
+                                        unit="days"
+                                        min="180"
+                                        max="365"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // ========== Input Field Component ==========
+        function InputField({ label, value, onChange, unit, step = "1", min = "0", max }) {
+            return (
+                <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {label}
+                    </label>
+                    <div className="relative">
+                        <input
+                            type="number"
+                            value={value}
+                            onChange={(e) => onChange(e.target.value)}
+                            step={step}
+                            min={min}
+                            max={max}
+                            className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg input-focus transition"
+                        />
+                        {unit && (
+                            <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">
+                                {unit}
+                            </span>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // ========== Results Display Component ==========
+        function ResultsDisplay({ results, params, formatNumber, formatCurrency, getPaybackRating, activeTab, setActiveTab }) {
+            const rating = getPaybackRating(results.metrics.paybackPeriodMonths);
+
+            return (
+                <div className="space-y-6 animate-fade-in" id="results-container">
+                    {/* Key Metrics Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="metrics-cards">
+                        <MetricCard
+                            title="Payback Period"
+                            value={isFinite(results.metrics.paybackPeriodMonths) ? `${formatNumber(results.metrics.paybackPeriodMonths, 1)} mo` : 'Not Viable'}
+                            subtitle={isFinite(results.metrics.paybackPeriodDays) ? `${formatNumber(results.metrics.paybackPeriodDays, 0)} days` : ''}
+                            badge={rating.text}
+                            badgeColor={rating.color}
+                            icon="⏱️"
+                        />
+
+                        <MetricCard
+                            title="Annual ROI"
+                            value={`${formatNumber(results.metrics.annualROI, 1)}%`}
+                            subtitle={results.metrics.annualROI >= 100 ? 'Excellent Return' : results.metrics.annualROI >= 50 ? 'Good Return' : 'Average Return'}
+                            icon="📈"
+                        />
+
+                        <MetricCard
+                            title="Monthly Net Profit"
+                            value={formatCurrency(results.profit.monthlyNet)}
+                            subtitle="EBITDA"
+                            icon="💰"
+                        />
+
+                        <MetricCard
+                            title="Break-even Point"
+                            value={`${formatNumber(results.metrics.breakEvenPoint, 0)} orders/day`}
+                            subtitle={`Current: ${formatNumber(results.revenue.dailyOrders, 0)} orders/day`}
+                            icon="⚖️"
+                        />
+                    </div>
+
+                    {/* Detailed Data Display */}
+                    <div className="bg-white rounded-xl card-shadow p-6">
+                        {/* Tabs */}
+                        <div className="flex border-b border-gray-200 mb-6 overflow-x-auto">
+                            <TabButton active={activeTab === 'overview'} onClick={() => setActiveTab('overview')}>
+                                Overview
+                            </TabButton>
+                            <TabButton active={activeTab === 'revenue'} onClick={() => setActiveTab('revenue')}>
+                                Revenue
+                            </TabButton>
+                            <TabButton active={activeTab === 'cost'} onClick={() => setActiveTab('cost')}>
+                                Costs
+                            </TabButton>
+                            <TabButton active={activeTab === 'profit'} onClick={() => setActiveTab('profit')}>
+                                Profit
+                            </TabButton>
+                            <TabButton active={activeTab === 'charts'} onClick={() => setActiveTab('charts')}>
+                                Charts
+                            </TabButton>
+                        </div>
+
+                        {/* Tab Content */}
+                        <div className="animate-fade-in">
+                            {activeTab === 'overview' && (
+                                <OverviewTab results={results} formatNumber={formatNumber} formatCurrency={formatCurrency} />
+                            )}
+                            {activeTab === 'revenue' && (
+                                <RevenueTab results={results} params={params} formatNumber={formatNumber} formatCurrency={formatCurrency} />
+                            )}
+                            {activeTab === 'cost' && (
+                                <CostTab results={results} params={params} formatNumber={formatNumber} formatCurrency={formatCurrency} />
+                            )}
+                            {activeTab === 'profit' && (
+                                <ProfitTab results={results} formatNumber={formatNumber} formatCurrency={formatCurrency} />
+                            )}
+                            {activeTab === 'charts' && (
+                                <ChartsTab results={results} params={params} />
+                            )}
+                        </div>
+
+                        {/* Export Buttons */}
+                        <ExportButtons results={results} params={params} formatNumber={formatNumber} formatCurrency={formatCurrency} getPaybackRating={getPaybackRating} />
+                    </div>
+                </div>
+            );
+        }
+
+        // ========== Metric Card Component ==========
+        function MetricCard({ title, value, subtitle, badge, badgeColor, icon }) {
+            const badgeColors = {
+                excellent: 'badge-excellent',
+                good: 'badge-good',
+                average: 'badge-average',
+                poor: 'badge-poor'
+            };
+
+            return (
+                <div className="bg-white rounded-xl card-shadow p-6 metric-card">
+                    <div className="flex items-start justify-between mb-3">
+                        <p className="text-gray-600 text-sm font-medium">{title}</p>
+                        <span className="text-2xl">{icon}</span>
+                    </div>
+                    <p className="text-2xl font-bold text-primary mb-2">{value}</p>
+                    {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
+                    {badge && (
+                        <span className={`inline-block mt-3 px-3 py-1 rounded-full text-xs font-semibold ${badgeColors[badgeColor] || 'bg-gray-100 text-gray-800'}`}>
+                            {badge}
+                        </span>
+                    )}
+                </div>
+            );
+        }
+
+        // ========== Tab Button Component ==========
+        function TabButton({ active, onClick, children }) {
+            return (
+                <button
+                    onClick={onClick}
+                    className={`px-6 py-3 font-semibold transition whitespace-nowrap ${
+                        active
+                            ? 'text-primary border-b-2 border-primary'
+                            : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                >
+                    {children}
+                </button>
+            );
+        }
+
+        // ========== Overview Tab ==========
+        function OverviewTab({ results, formatNumber, formatCurrency }) {
+            return (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <DataSection title="Revenue Overview">
+                        <DataRow label="Daily Revenue" value={formatCurrency(results.revenue.daily)} />
+                        <DataRow label="Monthly Revenue" value={formatCurrency(results.revenue.monthly)} />
+                        <DataRow label="Annual Revenue" value={formatCurrency(results.revenue.yearly)} />
+                        <DataRow label="Daily Total Orders" value={`${formatNumber(results.revenue.dailyOrders, 1)} orders`} />
+                    </DataSection>
+
+                    <DataSection title="Cost Overview">
+                        <DataRow label="Initial Investment" value={formatCurrency(results.costs.initial)} />
+                        <DataRow label="Daily Operating Cost" value={formatCurrency(results.costs.dailyOperating)} />
+                        <DataRow label="Monthly Operating Cost" value={formatCurrency(results.costs.monthlyOperating)} />
+                        <DataRow label="Annual Operating Cost" value={formatCurrency(results.costs.yearlyOperating)} />
+                    </DataSection>
+
+                    <DataSection title="Profit Overview">
+                        <DataRow label="Daily Gross Income" value={formatCurrency(results.profit.dailyGross)} />
+                        <DataRow label="Daily Net Profit" value={formatCurrency(results.profit.dailyNet)} highlight />
+                        <DataRow label="Monthly Net Profit" value={formatCurrency(results.profit.monthlyNet)} highlight />
+                        <DataRow label="Annual Net Profit" value={formatCurrency(results.profit.yearlyNet)} highlight />
+                    </DataSection>
+
+                    <DataSection title="Key Metrics">
+                        <DataRow label="Gross Margin" value={`${formatNumber(results.metrics.grossMargin, 1)}%`} />
+                        <DataRow label="Net Margin" value={`${formatNumber(results.metrics.netMargin, 1)}%`} />
+                        <DataRow label="Annual ROI" value={`${formatNumber(results.metrics.annualROI, 1)}%`} highlight />
+                        <DataRow label="Payback Period" value={isFinite(results.metrics.paybackPeriodMonths) ? `${formatNumber(results.metrics.paybackPeriodMonths, 1)} months` : 'Not Viable'} highlight />
+                    </DataSection>
+                </div>
+            );
+        }
+
+        // ========== Revenue Tab ==========
+        function RevenueTab({ results, params, formatNumber, formatCurrency }) {
+            const totalCommission = (params.venueCommission + params.supplierCommission + params.paymentFee);
+            const commissionAmount = results.revenue.daily * totalCommission / 100;
+
+            return (
+                <div className="space-y-6">
+                    <DataSection title="Revenue Details">
+                        <DataRow label="Daily Total Orders" value={`${formatNumber(results.revenue.dailyOrders, 1)} orders`} />
+                        <DataRow label="Price per Rental" value={formatCurrency(params.pricePerOrder)} />
+                        <DataRow label="Daily Revenue" value={formatCurrency(results.revenue.daily)} highlight />
+                        <DataRow label="Monthly Revenue" value={formatCurrency(results.revenue.monthly)} />
+                        <DataRow label="Annual Revenue" value={formatCurrency(results.revenue.yearly)} />
+                    </DataSection>
+
+                    <DataSection title="Commission Breakdown">
+                        <DataRow label="Venue Commission" value={`${params.venueCommission}% - ${formatCurrency(results.revenue.daily * params.venueCommission / 100)}/day`} />
+                        <DataRow label="Payment Processing Fee" value={`${params.paymentFee}% - ${formatCurrency(results.revenue.daily * params.paymentFee / 100)}/day`} />
+                        {params.supplierCommission > 0 && (
+                            <DataRow label="Supplier Commission" value={`${params.supplierCommission}% - ${formatCurrency(results.revenue.daily * params.supplierCommission / 100)}/day`} />
+                        )}
+                        <DataRow label="Total Commission Rate" value={`${formatNumber(totalCommission, 1)}%`} />
+                        <DataRow label="Total Commission Amount" value={formatCurrency(commissionAmount)} />
+                        <DataRow label="Actual Net Revenue" value={formatCurrency(results.profit.dailyGross)} highlight />
+                    </DataSection>
+                </div>
+            );
+        }
+
+        // ========== Cost Tab ==========
+        function CostTab({ results, params, formatNumber, formatCurrency }) {
+            return (
+                <div className="space-y-6">
+                    <DataSection title="Initial Investment (CAPEX)">
+                        <DataRow label="Device Cost" value={formatCurrency(params.deviceCost * params.sites)} />
+                        <DataRow label="Logistics Cost" value={formatCurrency(params.logisticsCost * params.sites)} />
+                        <DataRow label="Software License Fee" value={formatCurrency(params.softwareLicense)} />
+                        <DataRow label="Marketing Budget" value={formatCurrency(params.marketingCost)} />
+                        <DataRow label="Total Initial Investment" value={formatCurrency(results.costs.initial)} highlight />
+                    </DataSection>
+
+                    <DataSection title="Daily Operating Costs (OPEX)">
+                        <DataRow label="Labor Cost" value={formatCurrency(params.dailyLaborCost)} />
+                        <DataRow label="Communication Cost" value={formatCurrency(params.dailyCommCost)} />
+                        <DataRow label="Maintenance Cost" value={formatCurrency(params.dailyMaintenanceCost)} />
+                        <DataRow label="Device Wear" value={formatCurrency(params.deviceWearCost * results.revenue.dailyOrders)} />
+                        <DataRow label="Total Daily Operating Cost" value={formatCurrency(results.costs.dailyOperating)} highlight />
+                    </DataSection>
+
+                    <DataSection title="Cost Analysis">
+                        <DataRow
+                            label="Operating Cost / Revenue Ratio"
+                            value={`${formatNumber((results.costs.dailyOperating / results.revenue.daily) * 100, 1)}%`}
+                        />
+                        <DataRow
+                            label="Cost per Station per Day"
+                            value={formatCurrency(results.costs.dailyOperating / params.sites)}
+                        />
+                        <DataRow
+                            label="Average Cost per Order"
+                            value={formatCurrency(results.costs.dailyOperating / results.revenue.dailyOrders)}
+                        />
+                    </DataSection>
+                </div>
+            );
+        }
+
+        // ========== Profit Tab ==========
+        function ProfitTab({ results, formatNumber, formatCurrency }) {
+            return (
+                <div className="space-y-6">
+                    <DataSection title="Profit Details">
+                        <DataRow label="Daily Revenue" value={formatCurrency(results.revenue.daily)} />
+                        <DataRow label="Daily Gross Income" value={formatCurrency(results.profit.dailyGross)} />
+                        <DataRow label="Daily Operating Cost" value={formatCurrency(results.costs.dailyOperating)} />
+                        <DataRow label="Daily Net Profit" value={formatCurrency(results.profit.dailyNet)} highlight />
+                        <DataRow label="Monthly Net Profit" value={formatCurrency(results.profit.monthlyNet)} highlight />
+                        <DataRow label="Annual Net Profit" value={formatCurrency(results.profit.yearlyNet)} highlight />
+                    </DataSection>
+
+                    <DataSection title="Profitability Metrics">
+                        <DataRow label="Gross Margin" value={`${formatNumber(results.metrics.grossMargin, 2)}%`} />
+                        <DataRow label="Net Margin" value={`${formatNumber(results.metrics.netMargin, 2)}%`} />
+                        <DataRow
+                            label="Contribution Margin"
+                            value={`${formatNumber(100 - (results.costs.dailyOperating / results.revenue.daily) * 100, 2)}%`}
+                        />
+                    </DataSection>
+
+                    <DataSection title="Cash Flow Analysis">
+                        <DataRow label="Initial Investment" value={formatCurrency(results.costs.initial)} />
+                        <DataRow label="Monthly Cash Inflow" value={formatCurrency(results.profit.monthlyNet)} />
+                        <DataRow label="Annual Cash Inflow" value={formatCurrency(results.profit.yearlyNet)} />
+                        <DataRow
+                            label="3-Year Cumulative Cash Flow"
+                            value={formatCurrency(results.profit.yearlyNet * 3 - results.costs.initial)}
+                            highlight
+                        />
+                    </DataSection>
+                </div>
+            );
+        }
+
+        // ========== Charts Tab ==========
+        function ChartsTab({ results, params }) {
+            const revenueChartRef = useRef(null);
+            const costChartRef = useRef(null);
+            const profitChartRef = useRef(null);
+            const paybackChartRef = useRef(null);
+
+            useEffect(() => {
+                // Revenue Trend Chart
+                if (revenueChartRef.current) {
+                    const ctx = revenueChartRef.current.getContext('2d');
+                    const months = Array.from({ length: 24 }, (_, i) => i + 1);
+                    const cumulativeProfit = months.map(m => results.profit.monthlyNet * m - results.costs.initial);
+
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: months.map(m => `Month ${m}`),
+                            datasets: [{
+                                label: 'Cumulative Net Profit',
+                                data: cumulativeProfit,
+                                borderColor: '#070346',
+                                backgroundColor: 'rgba(7, 3, 70, 0.1)',
+                                fill: true,
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: '24-Month Cumulative Profit Trend',
+                                    font: { size: 16, weight: 'bold' }
+                                },
+                                legend: { display: true }
+                            },
+                            scales: {
+                                y: {
+                                    ticks: {
+                                        callback: (value) => '$' + value.toLocaleString()
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // Cost Composition Chart
+                if (costChartRef.current) {
+                    const ctx = costChartRef.current.getContext('2d');
+                    new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Device Cost', 'Logistics Cost', 'Software License', 'Marketing'],
+                            datasets: [{
+                                data: [
+                                    params.deviceCost * params.sites,
+                                    params.logisticsCost * params.sites,
+                                    params.softwareLicense,
+                                    params.marketingCost
+                                ],
+                                backgroundColor: ['#070346', '#FD6450', '#10b981', '#f59e0b']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Initial Investment Breakdown',
+                                    font: { size: 16, weight: 'bold' }
+                                },
+                                legend: { position: 'bottom' }
+                            }
+                        }
+                    });
+                }
+
+                // Profit Breakdown Bar Chart
+                if (profitChartRef.current) {
+                    const ctx = profitChartRef.current.getContext('2d');
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Daily', 'Monthly', 'Annual'],
+                            datasets: [
+                                {
+                                    label: 'Revenue',
+                                    data: [results.revenue.daily, results.revenue.monthly, results.revenue.yearly],
+                                    backgroundColor: '#070346'
+                                },
+                                {
+                                    label: 'Operating Cost',
+                                    data: [results.costs.dailyOperating, results.costs.monthlyOperating, results.costs.yearlyOperating],
+                                    backgroundColor: '#f59e0b'
+                                },
+                                {
+                                    label: 'Net Profit',
+                                    data: [results.profit.dailyNet, results.profit.monthlyNet, results.profit.yearlyNet],
+                                    backgroundColor: '#10b981'
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Revenue - Cost - Profit Comparison',
+                                    font: { size: 16, weight: 'bold' }
+                                },
+                                legend: { position: 'bottom' }
+                            },
+                            scales: {
+                                y: {
+                                    ticks: {
+                                        callback: (value) => '$' + value.toLocaleString()
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // Break-even Chart
+                if (paybackChartRef.current && isFinite(results.metrics.paybackPeriodMonths)) {
+                    const ctx = paybackChartRef.current.getContext('2d');
+                    const months = Array.from({ length: Math.ceil(results.metrics.paybackPeriodMonths) + 6 }, (_, i) => i);
+                    const investment = months.map(m => -results.costs.initial);
+                    const profit = months.map(m => results.profit.monthlyNet * m - results.costs.initial);
+
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: months.map(m => `Month ${m}`),
+                            datasets: [
+                                {
+                                    label: 'Initial Investment',
+                                    data: investment,
+                                    borderColor: '#ef4444',
+                                    borderDash: [5, 5],
+                                    fill: false
+                                },
+                                {
+                                    label: 'Cumulative Net Profit',
+                                    data: profit,
+                                    borderColor: '#10b981',
+                                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                    fill: true
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Break-even Analysis',
+                                    font: { size: 16, weight: 'bold' }
+                                },
+                                legend: { position: 'bottom' }
+                            },
+                            scales: {
+                                y: {
+                                    ticks: {
+                                        callback: (value) => '$' + value.toLocaleString()
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            }, [results, params]);
+
+            return (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                        <canvas ref={revenueChartRef} height="250"></canvas>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                        <canvas ref={costChartRef} height="250"></canvas>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                        <canvas ref={profitChartRef} height="250"></canvas>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                        <canvas ref={paybackChartRef} height="250"></canvas>
+                    </div>
+                </div>
+            );
+        }
+
+        // ========== Data Section Component ==========
+        function DataSection({ title, children }) {
+            return (
+                <div>
+                    <h3 className="text-lg font-bold text-gray-800 mb-4 pb-2 border-b-2 border-primary">
+                        {title}
+                    </h3>
+                    <div className="space-y-3">
+                        {children}
+                    </div>
+                </div>
+            );
+        }
+
+        // ========== Data Row Component ==========
+        function DataRow({ label, value, highlight }) {
+            return (
+                <div className={`flex justify-between items-center py-2 ${highlight ? 'font-bold text-primary' : ''}`}>
+                    <span className="text-gray-700">{label}</span>
+                    <span className={highlight ? 'text-xl' : 'text-gray-900 font-medium'}>{value}</span>
+                </div>
+            );
+        }
+
+        // ========== Export Buttons Component ==========
+        function ExportButtons({ results, params, formatNumber, formatCurrency, getPaybackRating }) {
+            const exportToPDF = async () => {
+                try {
+                    showNotification('Generating PDF report...', 'info');
+
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF();
+
+                    // Header
+                    doc.setFillColor(7, 3, 70);
+                    doc.rect(0, 0, 210, 40, 'F');
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(24);
+                    doc.text('Power Bank ROI Analysis', 20, 25);
+                    doc.setFontSize(12);
+                    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 20, 33);
+
+                    // Reset text color
+                    doc.setTextColor(0, 0, 0);
+
+                    // Key Metrics
+                    doc.setFontSize(16);
+                    doc.setTextColor(7, 3, 70);
+                    doc.text('Key Metrics', 20, 55);
+
+                    doc.setFontSize(11);
+                    doc.setTextColor(0, 0, 0);
+                    let y = 65;
+
+                    const rating = getPaybackRating(results.metrics.paybackPeriodMonths);
+                    doc.text(`Payback Period: ${isFinite(results.metrics.paybackPeriodMonths) ? formatNumber(results.metrics.paybackPeriodMonths, 1) + ' months' : 'Not Viable'} (${rating.text})`, 20, y);
+                    y += 8;
+                    doc.text(`Annual ROI: ${formatNumber(results.metrics.annualROI, 1)}%`, 20, y);
+                    y += 8;
+                    doc.text(`Monthly Net Profit: ${formatCurrency(results.profit.monthlyNet)}`, 20, y);
+                    y += 8;
+                    doc.text(`Break-even Point: ${formatNumber(results.metrics.breakEvenPoint, 0)} orders/day`, 20, y);
+
+                    // Revenue Overview
+                    y += 15;
+                    doc.setFontSize(16);
+                    doc.setTextColor(7, 3, 70);
+                    doc.text('Revenue Overview', 20, y);
+                    y += 10;
+
+                    doc.setFontSize(11);
+                    doc.setTextColor(0, 0, 0);
+                    doc.text(`Daily Revenue: ${formatCurrency(results.revenue.daily)}`, 20, y);
+                    y += 7;
+                    doc.text(`Monthly Revenue: ${formatCurrency(results.revenue.monthly)}`, 20, y);
+                    y += 7;
+                    doc.text(`Annual Revenue: ${formatCurrency(results.revenue.yearly)}`, 20, y);
+                    y += 7;
+                    doc.text(`Daily Total Orders: ${formatNumber(results.revenue.dailyOrders, 1)} orders`, 20, y);
+
+                    // Cost Overview
+                    y += 15;
+                    doc.setFontSize(16);
+                    doc.setTextColor(7, 3, 70);
+                    doc.text('Cost Overview', 20, y);
+                    y += 10;
+
+                    doc.setFontSize(11);
+                    doc.setTextColor(0, 0, 0);
+                    doc.text(`Initial Investment: ${formatCurrency(results.costs.initial)}`, 20, y);
+                    y += 7;
+                    doc.text(`Monthly Operating Cost: ${formatCurrency(results.costs.monthlyOperating)}`, 20, y);
+                    y += 7;
+                    doc.text(`Annual Operating Cost: ${formatCurrency(results.costs.yearlyOperating)}`, 20, y);
+
+                    // Profit Overview
+                    y += 15;
+                    doc.setFontSize(16);
+                    doc.setTextColor(7, 3, 70);
+                    doc.text('Profit Overview', 20, y);
+                    y += 10;
+
+                    doc.setFontSize(11);
+                    doc.setTextColor(0, 0, 0);
+                    doc.text(`Daily Net Profit: ${formatCurrency(results.profit.dailyNet)}`, 20, y);
+                    y += 7;
+                    doc.text(`Monthly Net Profit: ${formatCurrency(results.profit.monthlyNet)}`, 20, y);
+                    y += 7;
+                    doc.text(`Annual Net Profit: ${formatCurrency(results.profit.yearlyNet)}`, 20, y);
+                    y += 7;
+                    doc.text(`Gross Margin: ${formatNumber(results.metrics.grossMargin, 1)}%`, 20, y);
+                    y += 7;
+                    doc.text(`Net Margin: ${formatNumber(results.metrics.netMargin, 1)}%`, 20, y);
+
+                    // New page for parameters
+                    doc.addPage();
+
+                    doc.setFontSize(16);
+                    doc.setTextColor(7, 3, 70);
+                    doc.text('Input Parameters', 20, 20);
+                    y = 30;
+
+                    doc.setFontSize(11);
+                    doc.setTextColor(0, 0, 0);
+                    doc.text(`Number of Stations: ${params.sites}`, 20, y);
+                    y += 7;
+                    doc.text(`Daily Orders per Station: ${params.ordersPerSite}`, 20, y);
+                    y += 7;
+                    doc.text(`Price per Rental: $${params.pricePerOrder}`, 20, y);
+                    y += 7;
+                    doc.text(`Device Cost per Station: $${params.deviceCost}`, 20, y);
+                    y += 7;
+                    doc.text(`Venue Commission Rate: ${params.venueCommission}%`, 20, y);
+
+                    // Footer
+                    const pageCount = doc.internal.getNumberOfPages();
+                    for (let i = 1; i <= pageCount; i++) {
+                        doc.setPage(i);
+                        doc.setFontSize(9);
+                        doc.setTextColor(128, 128, 128);
+                        doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, { align: 'center' });
+                        doc.text('Power Bank Sharing ROI Calculator', 20, doc.internal.pageSize.height - 10);
+                    }
+
+                    doc.save(`PowerBank_ROI_Report_${new Date().toLocaleDateString()}.pdf`);
+                    showNotification('PDF report downloaded successfully!', 'success');
+                } catch (error) {
+                    console.error('PDF export error:', error);
+                    showNotification('Failed to generate PDF. Please try again.', 'error');
+                }
+            };
+
+            const exportToExcel = () => {
+                try {
+                    const wb = XLSX.utils.book_new();
+
+                    // Parameters sheet
+                    const paramsData = [
+                        ['Power Bank Sharing ROI Calculator - Input Parameters'],
+                        [''],
+                        ['Parameter Name', 'Value', 'Unit'],
+                        ['Number of Stations', params.sites, 'units'],
+                        ['Daily Orders per Station', params.ordersPerSite, 'orders'],
+                        ['Price per Rental', params.pricePerOrder, '$'],
+                        ['Device Cost per Station', params.deviceCost, '$'],
+                        ['Venue Commission Rate', params.venueCommission, '%'],
+                        ['Logistics Cost per Station', params.logisticsCost, '$'],
+                        ['Software License Fee', params.softwareLicense, '$'],
+                        ['Marketing Budget', params.marketingCost, '$'],
+                        ['Payment Processing Fee', params.paymentFee, '%'],
+                        ['Supplier Commission Rate', params.supplierCommission, '%'],
+                        ['Daily Labor Cost', params.dailyLaborCost, '$'],
+                        ['Daily Communication Cost', params.dailyCommCost, '$'],
+                        ['Daily Maintenance Cost', params.dailyMaintenanceCost, '$'],
+                        ['Device Wear Cost per Order', params.deviceWearCost, '$/order'],
+                        ['Operating Days per Year', params.operatingDays, 'days']
+                    ];
+                    const wsParams = XLSX.utils.aoa_to_sheet(paramsData);
+                    XLSX.utils.book_append_sheet(wb, wsParams, 'Input Parameters');
+
+                    // Results sheet
+                    const resultsData = [
+                        ['Power Bank Sharing ROI Calculator - Results'],
+                        ['Generated: ' + new Date().toLocaleString()],
+                        [''],
+                        ['Metric Name', 'Value', 'Unit'],
+                        ['Daily Revenue', results.revenue.daily.toFixed(2), '$'],
+                        ['Monthly Revenue', results.revenue.monthly.toFixed(2), '$'],
+                        ['Annual Revenue', results.revenue.yearly.toFixed(2), '$'],
+                        ['Daily Total Orders', results.revenue.dailyOrders.toFixed(1), 'orders'],
+                        [''],
+                        ['Initial Investment', results.costs.initial.toFixed(2), '$'],
+                        ['Daily Operating Cost', results.costs.dailyOperating.toFixed(2), '$'],
+                        ['Monthly Operating Cost', results.costs.monthlyOperating.toFixed(2), '$'],
+                        ['Annual Operating Cost', results.costs.yearlyOperating.toFixed(2), '$'],
+                        [''],
+                        ['Daily Net Profit', results.profit.dailyNet.toFixed(2), '$'],
+                        ['Monthly Net Profit', results.profit.monthlyNet.toFixed(2), '$'],
+                        ['Annual Net Profit', results.profit.yearlyNet.toFixed(2), '$'],
+                        [''],
+                        ['Payback Period', results.metrics.paybackPeriodMonths.toFixed(1), 'months'],
+                        ['Payback Period', results.metrics.paybackPeriodDays.toFixed(0), 'days'],
+                        ['Annual ROI', results.metrics.annualROI.toFixed(2), '%'],
+                        ['Gross Margin', results.metrics.grossMargin.toFixed(2), '%'],
+                        ['Net Margin', results.metrics.netMargin.toFixed(2), '%'],
+                        ['Break-even Point', results.metrics.breakEvenPoint.toFixed(0), 'orders/day']
+                    ];
+                    const wsResults = XLSX.utils.aoa_to_sheet(resultsData);
+                    XLSX.utils.book_append_sheet(wb, wsResults, 'Calculation Results');
+
+                    XLSX.writeFile(wb, `PowerBank_ROI_Analysis_${new Date().toLocaleDateString()}.xlsx`);
+                    showNotification('Excel file downloaded successfully!', 'success');
+                } catch (error) {
+                    console.error('Excel export error:', error);
+                    showNotification('Failed to generate Excel file. Please try again.', 'error');
+                }
+            };
+
+            const exportToImage = async () => {
+                try {
+                    showNotification('Generating image...', 'info');
+
+                    const metricsCards = document.getElementById('metrics-cards');
+                    if (!metricsCards) {
+                        throw new Error('Metrics cards not found');
+                    }
+
+                    const canvas = await html2canvas(metricsCards, {
+                        backgroundColor: '#E6F0EC',
+                        scale: 2,
+                        logging: false,
+                        useCORS: true
+                    });
+
+                    canvas.toBlob((blob) => {
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = `PowerBank_ROI_Metrics_${new Date().toLocaleDateString()}.png`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        URL.revokeObjectURL(url);
+                        showNotification('Image downloaded successfully!', 'success');
+                    });
+                } catch (error) {
+                    console.error('Image export error:', error);
+                    showNotification('Failed to generate image. Please try again.', 'error');
+                }
+            };
+
+            const shareLink = () => {
+                try {
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('params', btoa(JSON.stringify(params)));
+
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(url.toString()).then(() => {
+                            showNotification('Share link copied to clipboard!', 'success');
+                        }).catch(() => {
+                            // Fallback
+                            prompt('Copy this link to share:', url.toString());
+                            showNotification('Share link generated!', 'success');
+                        });
+                    } else {
+                        // Fallback for older browsers
+                        prompt('Copy this link to share:', url.toString());
+                        showNotification('Share link generated!', 'success');
+                    }
+                } catch (error) {
+                    console.error('Share error:', error);
+                    showNotification('Failed to generate share link.', 'error');
+                }
+            };
+
+            return (
+                <div className="mt-8 pt-6 border-t border-gray-200">
+                    <h3 className="text-lg font-bold text-gray-800 mb-4">Export Report</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <button
+                            onClick={exportToPDF}
+                            className="px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition font-medium flex items-center justify-center gap-2"
+                            title="Download PDF report"
+                        >
+                            <span>📄</span> PDF
+                        </button>
+                        <button
+                            onClick={exportToExcel}
+                            className="px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition font-medium flex items-center justify-center gap-2"
+                            title="Download Excel spreadsheet"
+                        >
+                            <span>📊</span> Excel
+                        </button>
+                        <button
+                            onClick={exportToImage}
+                            className="px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition font-medium flex items-center justify-center gap-2"
+                            title="Download metrics as image"
+                        >
+                            <span>🖼️</span> Image
+                        </button>
+                        <button
+                            onClick={shareLink}
+                            className="px-4 py-3 gradient-accent text-white rounded-lg transition font-medium flex items-center justify-center gap-2 btn-primary"
+                            title="Copy share link to clipboard"
+                        >
+                            <span>🔗</span> Share
+                        </button>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-3 text-center">
+                        All exports include complete analysis data
+                    </p>
+                </div>
+            );
+        }
+
+        // ========== Render Application ==========
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

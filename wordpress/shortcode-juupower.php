@@ -33,16 +33,16 @@ function juupower_roi_calculator_shortcode($atts) {
         'price' => '',
     ), $atts);
 
-    // Calculator file URL
+    // Calculator file URL (v2 with fixed exports and button alignment)
     // Option 1: Use theme directory
-    $calculator_url = get_template_directory_uri() . '/calculator/calculator-embed-en.html';
+    $calculator_url = get_template_directory_uri() . '/calculator/calculator-embed-en-v2.html';
 
     // Option 2: Use uploads directory (uncomment if preferred)
     // $upload_dir = wp_upload_dir();
-    // $calculator_url = $upload_dir['baseurl'] . '/calculator/calculator-embed-en.html';
+    // $calculator_url = $upload_dir['baseurl'] . '/calculator/calculator-embed-en-v2.html';
 
     // Option 3: Use external URL (uncomment if hosted separately)
-    // $calculator_url = 'https://calculator.juupower.com/calculator-embed-en.html';
+    // $calculator_url = 'https://calculator.juupower.com/calculator-embed-en-v2.html';
 
     // Build query parameters if defaults provided
     $query_params = array();
@@ -238,7 +238,7 @@ function juupower_roi_calculator_button_shortcode($atts) {
         'new_window' => 'yes',
     ), $atts);
 
-    $calculator_url = !empty($atts['url']) ? $atts['url'] : get_template_directory_uri() . '/calculator/calculator-embed-en.html';
+    $calculator_url = !empty($atts['url']) ? $atts['url'] : get_template_directory_uri() . '/calculator/calculator-embed-en-v2.html';
     $target = ($atts['new_window'] === 'yes') ? '_blank' : '_self';
 
     // Button styles based on JuuPower theme
@@ -294,16 +294,24 @@ add_action('admin_head', 'juupower_calculator_admin_css');
  *
  * Step 1: Upload Calculator File
  * -------------------------------
- * Upload "calculator-embed-en.html" to one of these locations:
+ * Upload "calculator-embed-en-v2.html" to one of these locations:
  *
  * Option A (Recommended): Theme directory
- *   Path: wp-content/themes/your-theme/calculator/calculator-embed-en.html
+ *   Path: wp-content/themes/your-theme/calculator/calculator-embed-en-v2.html
  *
  * Option B: Uploads directory
- *   Path: wp-content/uploads/calculator/calculator-embed-en.html
+ *   Path: wp-content/uploads/calculator/calculator-embed-en-v2.html
  *
  * Option C: External hosting
- *   Host on subdomain: https://calculator.juupower.com/calculator-embed-en.html
+ *   Host on subdomain: https://calculator.juupower.com/calculator-embed-en-v2.html
+ *
+ * Version 2 includes:
+ *   - Fixed button alignment issue
+ *   - Complete PDF export functionality
+ *   - Image export (PNG screenshots)
+ *   - Enhanced Excel export
+ *   - Improved share link feature
+ *   - Visual notification system
  *
  *
  * Step 2: Add This Code
