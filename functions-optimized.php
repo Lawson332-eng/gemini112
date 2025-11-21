@@ -229,6 +229,11 @@ function get_app_button_styles() {
         align-items: center;
         margin-top: 20px;
         margin-bottom: 20px;
+        border: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        outline: none !important;
     }
 
     /* 统一按钮基础样式 */
@@ -296,6 +301,30 @@ function get_app_button_styles() {
         display: inline-block !important;
         visibility: visible !important;
         opacity: 1 !important;
+    }
+
+    /* 移除 YITH 按钮外层可能的边框容器 */
+    .yith-ywraq-add-button,
+    .yith-ywraq-add-button-container,
+    .yith-ywraq-button-wrapper {
+        border: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+
+    /* 确保按钮内没有额外的容器边框 */
+    .custom-product-buttons-container > * {
+        box-shadow: none !important;
+        outline: none !important;
+    }
+
+    /* 移除可能的 woocommerce 容器边框 */
+    .single-product div.product form.cart,
+    .single-product div.product .yith-ywraq-add-button {
+        border: none !important;
+        box-shadow: none !important;
     }
 
     /* 移动端响应式 - 按钮竖排且全宽 */
