@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>共享充电宝ROI计算器 - 投资回报分析工具</title>
+    <meta name="description" content="专业的共享充电宝投资回报率计算器，帮助您快速评估投资可行性、回收周期和盈利能力">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+    <!-- Babel Standalone for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- jsPDF for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- SheetJS for Excel export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
+        }
+
+        .card-shadow {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-focus:focus {
+            outline: none;
+            border-color: #667EEA;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .metric-card {
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            opacity: 1;
+        }
+    </style>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#667EEA',
+                        secondary: '#764BA2',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // ========== 计算引擎 ==========
+        const calculateROI = (params) => {
+            // 基础参数
+            const sites = params.sites || 0;
+            const ordersPerSite = params.ordersPerSite || 0;
+            const pricePerOrder = params.pricePerOrder || 0;
+            const deviceCost = params.deviceCost || 0;
+            const venueCommission = params.venueCommission || 0;
+
+            // 高级参数
+            const logisticsCost = params.logisticsCost || 0;
+            const softwareLicense = params.softwareLicense || 0;
+            const marketingCost = params.marketingCost || 0;
+            const paymentFee = params.paymentFee || 0;
+            const supplierCommission = params.supplierCommission || 0;
+            const dailyLaborCost = params.dailyLaborCost || 0;
+            const dailyCommCost = params.dailyCommCost || 0;
+            const dailyMaintenanceCost = params.dailyMaintenanceCost || 0;
+            const deviceWearCost = params.deviceWearCost || 0;
+            const operatingDays = params.operatingDays || 365;
+
+            // 收入计算
+            const dailyOrders = sites * ordersPerSite;
+            const dailyRevenue = dailyOrders * pricePerOrder;
+            const monthlyRevenue = dailyRevenue * 30;
+            const yearlyRevenue = dailyRevenue * operatingDays;
+
+            // 成本计算
+            const initialInvestment = (deviceCost + logisticsCost) * sites + softwareLicense + marketingCost;
+            const dailyOperatingCost = dailyLaborCost + dailyCommCost + dailyMaintenanceCost + (deviceWearCost * dailyOrders);
+            const monthlyOperatingCost = dailyOperatingCost * 30;
+            const yearlyOperatingCost = dailyOperatingCost * operatingDays;
+
+            // 利润计算
+            const totalCommissionRate = (venueCommission + supplierCommission + paymentFee) / 100;
+            const dailyGrossIncome = dailyRevenue * (1 - totalCommissionRate);
+            const dailyNetProfit = dailyGrossIncome - dailyOperatingCost;
+            const monthlyNetProfit = dailyNetProfit * 30;
+            const yearlyNetProfit = dailyNetProfit * operatingDays;
+
+            // 关键指标
+            const paybackPeriodDays = dailyNetProfit > 0 ? initialInvestment / dailyNetProfit : Infinity;
+            const paybackPeriodMonths = paybackPeriodDays / 30;
+            const annualROI = initialInvestment > 0 ? (yearlyNetProfit / initialInvestment) * 100 : 0;
+            const grossMargin = dailyRevenue > 0 ? (dailyGrossIncome / dailyRevenue) * 100 : 0;
+            const netMargin = dailyRevenue > 0 ? (dailyNetProfit / dailyRevenue) * 100 : 0;
+            const breakEvenPoint = pricePerOrder > 0 ? (dailyOperatingCost + (dailyRevenue * totalCommissionRate)) / pricePerOrder : 0;
+
+            return {
+                revenue: {
+                    daily: dailyRevenue,
+                    monthly: monthlyRevenue,
+                    yearly: yearlyRevenue,
+                    dailyOrders
+                },
+                costs: {
+                    initial: initialInvestment,
+                    dailyOperating: dailyOperatingCost,
+                    monthlyOperating: monthlyOperatingCost,
+                    yearlyOperating: yearlyOperatingCost
+                },
+                profit: {
+                    dailyGross: dailyGrossIncome,
+                    dailyNet: dailyNetProfit,
+                    monthlyNet: monthlyNetProfit,
+                    yearlyNet: yearlyNetProfit
+                },
+                metrics: {
+                    paybackPeriodDays,
+                    paybackPeriodMonths,
+                    annualROI,
+                    grossMargin,
+                    netMargin,
+                    breakEvenPoint
+                }
+            };
+        };
+
+        // ========== 默认参数配置 ==========
+        const defaultParams = {
+            sites: 100,
+            ordersPerSite: 2.2,
+            pricePerOrder: 15,
+            deviceCost: 2500,
+            venueCommission: 20,
+            logisticsCost: 500,
+            softwareLicense: 50000,
+            marketingCost: 0,
+            paymentFee: 3,
+            supplierCommission: 0,
+            dailyLaborCost: 500,
+            dailyCommCost: 80,
+            dailyMaintenanceCost: 40,
+            deviceWearCost: 0.15,
+            operatingDays: 365
+        };
+
+        // 场景预设
+        const scenarios = {
+            conservative: {
+                name: '保守场景',
+                sites: 50,
+                ordersPerSite: 1.5,
+                pricePerOrder: 12,
+                deviceCost: 3000,
+                venueCommission: 30,
+                logisticsCost: 600,
+                softwareLicense: 50000,
+                marketingCost: 20000,
+                paymentFee: 3,
+                supplierCommission: 5,
+                dailyLaborCost: 600,
+                dailyCommCost: 100,
+                dailyMaintenanceCost: 50,
+                deviceWearCost: 0.2,
+                operatingDays: 365
+            },
+            standard: defaultParams,
+            optimistic: {
+                name: '乐观场景',
+                sites: 200,
+                ordersPerSite: 3.5,
+                pricePerOrder: 18,
+                deviceCost: 2000,
+                venueCommission: 15,
+                logisticsCost: 400,
+                softwareLicense: 50000,
+                marketingCost: 0,
+                paymentFee: 2.5,
+                supplierCommission: 0,
+                dailyLaborCost: 400,
+                dailyCommCost: 60,
+                dailyMaintenanceCost: 30,
+                deviceWearCost: 0.1,
+                operatingDays: 365
+            }
+        };
+
+        // ========== 主应用组件 ==========
+        function App() {
+            const [params, setParams] = useState(defaultParams);
+            const [results, setResults] = useState(null);
+            const [showAdvanced, setShowAdvanced] = useState(false);
+            const [activeTab, setActiveTab] = useState('overview');
+
+            useEffect(() => {
+                const calculated = calculateROI(params);
+                setResults(calculated);
+            }, [params]);
+
+            const updateParam = (key, value) => {
+                setParams(prev => ({ ...prev, [key]: parseFloat(value) || 0 }));
+            };
+
+            const loadScenario = (scenario) => {
+                setParams(scenarios[scenario]);
+            };
+
+            const formatNumber = (num, decimals = 0) => {
+                if (!isFinite(num)) return '∞';
+                return num.toLocaleString('zh-CN', {
+                    minimumFractionDigits: decimals,
+                    maximumFractionDigits: decimals
+                });
+            };
+
+            const formatCurrency = (num) => {
+                return '¥' + formatNumber(num, 2);
+            };
+
+            const getPaybackRating = (months) => {
+                if (!isFinite(months)) return { text: '无法回本', color: 'red' };
+                if (months <= 6) return { text: '优秀', color: 'green' };
+                if (months <= 12) return { text: '良好', color: 'blue' };
+                if (months <= 24) return { text: '一般', color: 'yellow' };
+                return { text: '较差', color: 'orange' };
+            };
+
+            return (
+                <div className="min-h-screen">
+                    {/* Header */}
+                    <header className="gradient-bg text-white py-8 shadow-lg">
+                        <div className="container mx-auto px-4">
+                            <h1 className="text-4xl font-bold mb-2">共享充电宝ROI计算器</h1>
+                            <p className="text-white/80">专业投资回报分析工具 - 数据驱动决策</p>
+                        </div>
+                    </header>
+
+                    {/* Main Content */}
+                    <div className="container mx-auto px-4 py-8">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            {/* Left: Parameters Input */}
+                            <div className="lg:col-span-1">
+                                <ParameterInput
+                                    params={params}
+                                    updateParam={updateParam}
+                                    showAdvanced={showAdvanced}
+                                    setShowAdvanced={setShowAdvanced}
+                                    loadScenario={loadScenario}
+                                />
+                            </div>
+
+                            {/* Right: Results Display */}
+                            <div className="lg:col-span-2">
+                                {results && (
+                                    <ResultsDisplay
+                                        results={results}
+                                        params={params}
+                                        formatNumber={formatNumber}
+                                        formatCurrency={formatCurrency}
+                                        getPaybackRating={getPaybackRating}
+                                        activeTab={activeTab}
+                                        setActiveTab={setActiveTab}
+                                    />
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Footer */}
+                    <footer className="bg-gray-800 text-white py-6 mt-16">
+                        <div className="container mx-auto px-4 text-center">
+                            <p className="text-gray-400">© 2025 共享充电宝ROI计算器 | 仅供参考，投资需谨慎</p>
+                        </div>
+                    </footer>
+                </div>
+            );
+        }
+
+        // ========== 参数输入组件 ==========
+        function ParameterInput({ params, updateParam, showAdvanced, setShowAdvanced, loadScenario }) {
+            return (
+                <div className="bg-white rounded-xl card-shadow p-6 animate-fade-in sticky top-4">
+                    <h2 className="text-2xl font-bold mb-6 text-gray-800">参数设置</h2>
+
+                    {/* 场景预设 */}
+                    <div className="mb-6">
+                        <label className="block text-sm font-semibold text-gray-700 mb-3">快速场景</label>
+                        <div className="grid grid-cols-3 gap-2">
+                            <button
+                                onClick={() => loadScenario('conservative')}
+                                className="px-3 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition text-sm font-medium"
+                            >
+                                保守
+                            </button>
+                            <button
+                                onClick={() => loadScenario('standard')}
+                                className="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition text-sm font-medium"
+                            >
+                                标准
+                            </button>
+                            <button
+                                onClick={() => loadScenario('optimistic')}
+                                className="px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition text-sm font-medium"
+                            >
+                                乐观
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="space-y-4">
+                        {/* 基础参数 */}
+                        <div className="pb-4 border-b border-gray-200">
+                            <h3 className="font-semibold text-gray-700 mb-4 flex items-center">
+                                <span className="w-2 h-2 bg-primary rounded-full mr-2"></span>
+                                基础参数
+                            </h3>
+
+                            <InputField
+                                label="投放站点数量"
+                                value={params.sites}
+                                onChange={(v) => updateParam('sites', v)}
+                                unit="个"
+                                min="1"
+                                max="10000"
+                            />
+
+                            <InputField
+                                label="每站点日均订单"
+                                value={params.ordersPerSite}
+                                onChange={(v) => updateParam('ordersPerSite', v)}
+                                unit="单"
+                                step="0.1"
+                                min="0.1"
+                                max="100"
+                            />
+
+                            <InputField
+                                label="单次租赁价格"
+                                value={params.pricePerOrder}
+                                onChange={(v) => updateParam('pricePerOrder', v)}
+                                unit="元"
+                                step="0.5"
+                                min="0.5"
+                                max="100"
+                            />
+
+                            <InputField
+                                label="单站设备成本"
+                                value={params.deviceCost}
+                                onChange={(v) => updateParam('deviceCost', v)}
+                                unit="元"
+                                min="100"
+                                max="50000"
+                            />
+
+                            <InputField
+                                label="场地分成比例"
+                                value={params.venueCommission}
+                                onChange={(v) => updateParam('venueCommission', v)}
+                                unit="%"
+                                step="1"
+                                min="0"
+                                max="80"
+                            />
+                        </div>
+
+                        {/* 高级参数 */}
+                        <div>
+                            <button
+                                onClick={() => setShowAdvanced(!showAdvanced)}
+                                className="w-full flex items-center justify-between py-2 text-primary hover:text-secondary transition font-semibold"
+                            >
+                                <span className="flex items-center">
+                                    <span className="w-2 h-2 bg-secondary rounded-full mr-2"></span>
+                                    高级参数
+                                </span>
+                                <svg
+                                    className={`w-5 h-5 transition-transform ${showAdvanced ? 'rotate-180' : ''}`}
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+
+                            {showAdvanced && (
+                                <div className="mt-4 space-y-4 animate-fade-in">
+                                    <InputField
+                                        label="单站物流成本"
+                                        value={params.logisticsCost}
+                                        onChange={(v) => updateParam('logisticsCost', v)}
+                                        unit="元"
+                                    />
+
+                                    <InputField
+                                        label="软件许可费"
+                                        value={params.softwareLicense}
+                                        onChange={(v) => updateParam('softwareLicense', v)}
+                                        unit="元"
+                                    />
+
+                                    <InputField
+                                        label="营销推广费"
+                                        value={params.marketingCost}
+                                        onChange={(v) => updateParam('marketingCost', v)}
+                                        unit="元"
+                                    />
+
+                                    <InputField
+                                        label="支付手续费率"
+                                        value={params.paymentFee}
+                                        onChange={(v) => updateParam('paymentFee', v)}
+                                        unit="%"
+                                        step="0.1"
+                                    />
+
+                                    <InputField
+                                        label="供应商分成比例"
+                                        value={params.supplierCommission}
+                                        onChange={(v) => updateParam('supplierCommission', v)}
+                                        unit="%"
+                                        step="1"
+                                    />
+
+                                    <InputField
+                                        label="日均人工成本"
+                                        value={params.dailyLaborCost}
+                                        onChange={(v) => updateParam('dailyLaborCost', v)}
+                                        unit="元"
+                                    />
+
+                                    <InputField
+                                        label="日均通信成本"
+                                        value={params.dailyCommCost}
+                                        onChange={(v) => updateParam('dailyCommCost', v)}
+                                        unit="元"
+                                    />
+
+                                    <InputField
+                                        label="日均系统维护费"
+                                        value={params.dailyMaintenanceCost}
+                                        onChange={(v) => updateParam('dailyMaintenanceCost', v)}
+                                        unit="元"
+                                    />
+
+                                    <InputField
+                                        label="充电宝损耗成本"
+                                        value={params.deviceWearCost}
+                                        onChange={(v) => updateParam('deviceWearCost', v)}
+                                        unit="元/单"
+                                        step="0.01"
+                                    />
+
+                                    <InputField
+                                        label="预期运营天数"
+                                        value={params.operatingDays}
+                                        onChange={(v) => updateParam('operatingDays', v)}
+                                        unit="天"
+                                        min="180"
+                                        max="365"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // ========== 输入字段组件 ==========
+        function InputField({ label, value, onChange, unit, step = "1", min = "0", max }) {
+            return (
+                <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {label}
+                    </label>
+                    <div className="relative">
+                        <input
+                            type="number"
+                            value={value}
+                            onChange={(e) => onChange(e.target.value)}
+                            step={step}
+                            min={min}
+                            max={max}
+                            className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg input-focus transition"
+                        />
+                        {unit && (
+                            <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">
+                                {unit}
+                            </span>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // ========== 结果展示组件 ==========
+        function ResultsDisplay({ results, params, formatNumber, formatCurrency, getPaybackRating, activeTab, setActiveTab }) {
+            const rating = getPaybackRating(results.metrics.paybackPeriodMonths);
+
+            return (
+                <div className="space-y-6 animate-fade-in">
+                    {/* 关键指标卡片 */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <MetricCard
+                            title="投资回收期"
+                            value={isFinite(results.metrics.paybackPeriodMonths) ? `${formatNumber(results.metrics.paybackPeriodMonths, 1)}月` : '无法回本'}
+                            subtitle={isFinite(results.metrics.paybackPeriodDays) ? `${formatNumber(results.metrics.paybackPeriodDays, 0)}天` : ''}
+                            badge={rating.text}
+                            badgeColor={rating.color}
+                            icon="⏱️"
+                        />
+
+                        <MetricCard
+                            title="年化ROI"
+                            value={`${formatNumber(results.metrics.annualROI, 1)}%`}
+                            subtitle={results.metrics.annualROI >= 100 ? '回报率优秀' : results.metrics.annualROI >= 50 ? '回报率良好' : '回报率一般'}
+                            icon="📈"
+                        />
+
+                        <MetricCard
+                            title="月净利润"
+                            value={formatCurrency(results.profit.monthlyNet)}
+                            subtitle="EBITDA"
+                            icon="💰"
+                        />
+
+                        <MetricCard
+                            title="盈亏平衡点"
+                            value={`${formatNumber(results.metrics.breakEvenPoint, 0)}单/天`}
+                            subtitle={`当前${formatNumber(results.revenue.dailyOrders, 0)}单/天`}
+                            icon="⚖️"
+                        />
+                    </div>
+
+                    {/* 详细数据展示 */}
+                    <div className="bg-white rounded-xl card-shadow p-6">
+                        {/* Tabs */}
+                        <div className="flex border-b border-gray-200 mb-6 overflow-x-auto">
+                            <TabButton active={activeTab === 'overview'} onClick={() => setActiveTab('overview')}>
+                                概览
+                            </TabButton>
+                            <TabButton active={activeTab === 'revenue'} onClick={() => setActiveTab('revenue')}>
+                                收入分析
+                            </TabButton>
+                            <TabButton active={activeTab === 'cost'} onClick={() => setActiveTab('cost')}>
+                                成本分析
+                            </TabButton>
+                            <TabButton active={activeTab === 'profit'} onClick={() => setActiveTab('profit')}>
+                                利润分析
+                            </TabButton>
+                            <TabButton active={activeTab === 'charts'} onClick={() => setActiveTab('charts')}>
+                                可视化
+                            </TabButton>
+                        </div>
+
+                        {/* Tab Content */}
+                        <div className="animate-fade-in">
+                            {activeTab === 'overview' && (
+                                <OverviewTab results={results} formatNumber={formatNumber} formatCurrency={formatCurrency} />
+                            )}
+                            {activeTab === 'revenue' && (
+                                <RevenueTab results={results} params={params} formatNumber={formatNumber} formatCurrency={formatCurrency} />
+                            )}
+                            {activeTab === 'cost' && (
+                                <CostTab results={results} params={params} formatNumber={formatNumber} formatCurrency={formatCurrency} />
+                            )}
+                            {activeTab === 'profit' && (
+                                <ProfitTab results={results} formatNumber={formatNumber} formatCurrency={formatCurrency} />
+                            )}
+                            {activeTab === 'charts' && (
+                                <ChartsTab results={results} params={params} />
+                            )}
+                        </div>
+
+                        {/* Export Buttons */}
+                        <ExportButtons results={results} params={params} />
+                    </div>
+                </div>
+            );
+        }
+
+        // ========== 指标卡片组件 ==========
+        function MetricCard({ title, value, subtitle, badge, badgeColor, icon }) {
+            const badgeColors = {
+                green: 'bg-green-100 text-green-800',
+                blue: 'bg-blue-100 text-blue-800',
+                yellow: 'bg-yellow-100 text-yellow-800',
+                orange: 'bg-orange-100 text-orange-800',
+                red: 'bg-red-100 text-red-800'
+            };
+
+            return (
+                <div className="bg-white rounded-xl card-shadow p-6 metric-card">
+                    <div className="flex items-start justify-between mb-3">
+                        <p className="text-gray-600 text-sm font-medium">{title}</p>
+                        <span className="text-2xl">{icon}</span>
+                    </div>
+                    <p className="text-2xl font-bold text-gray-800 mb-2">{value}</p>
+                    {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
+                    {badge && (
+                        <span className={`inline-block mt-3 px-3 py-1 rounded-full text-xs font-semibold ${badgeColors[badgeColor] || 'bg-gray-100 text-gray-800'}`}>
+                            {badge}
+                        </span>
+                    )}
+                </div>
+            );
+        }
+
+        // ========== Tab按钮组件 ==========
+        function TabButton({ active, onClick, children }) {
+            return (
+                <button
+                    onClick={onClick}
+                    className={`px-6 py-3 font-semibold transition whitespace-nowrap ${
+                        active
+                            ? 'text-primary border-b-2 border-primary'
+                            : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                >
+                    {children}
+                </button>
+            );
+        }
+
+        // ========== 概览Tab ==========
+        function OverviewTab({ results, formatNumber, formatCurrency }) {
+            return (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <DataSection title="收入概览">
+                        <DataRow label="日营业额" value={formatCurrency(results.revenue.daily)} />
+                        <DataRow label="月营业额" value={formatCurrency(results.revenue.monthly)} />
+                        <DataRow label="年营业额" value={formatCurrency(results.revenue.yearly)} />
+                        <DataRow label="日总订单数" value={`${formatNumber(results.revenue.dailyOrders, 1)}单`} />
+                    </DataSection>
+
+                    <DataSection title="成本概览">
+                        <DataRow label="初始投资" value={formatCurrency(results.costs.initial)} />
+                        <DataRow label="日运营成本" value={formatCurrency(results.costs.dailyOperating)} />
+                        <DataRow label="月运营成本" value={formatCurrency(results.costs.monthlyOperating)} />
+                        <DataRow label="年运营成本" value={formatCurrency(results.costs.yearlyOperating)} />
+                    </DataSection>
+
+                    <DataSection title="利润概览">
+                        <DataRow label="日毛收入" value={formatCurrency(results.profit.dailyGross)} />
+                        <DataRow label="日净利润" value={formatCurrency(results.profit.dailyNet)} highlight />
+                        <DataRow label="月净利润" value={formatCurrency(results.profit.monthlyNet)} highlight />
+                        <DataRow label="年净利润" value={formatCurrency(results.profit.yearlyNet)} highlight />
+                    </DataSection>
+
+                    <DataSection title="关键指标">
+                        <DataRow label="毛利率" value={`${formatNumber(results.metrics.grossMargin, 1)}%`} />
+                        <DataRow label="净利率" value={`${formatNumber(results.metrics.netMargin, 1)}%`} />
+                        <DataRow label="年化ROI" value={`${formatNumber(results.metrics.annualROI, 1)}%`} highlight />
+                        <DataRow label="回收期" value={isFinite(results.metrics.paybackPeriodMonths) ? `${formatNumber(results.metrics.paybackPeriodMonths, 1)}月` : '无法回本'} highlight />
+                    </DataSection>
+                </div>
+            );
+        }
+
+        // ========== 收入分析Tab ==========
+        function RevenueTab({ results, params, formatNumber, formatCurrency }) {
+            const totalCommission = (params.venueCommission + params.supplierCommission + params.paymentFee);
+            const commissionAmount = results.revenue.daily * totalCommission / 100;
+
+            return (
+                <div className="space-y-6">
+                    <DataSection title="收入明细">
+                        <DataRow label="日总订单数" value={`${formatNumber(results.revenue.dailyOrders, 1)}单`} />
+                        <DataRow label="单次租赁价格" value={formatCurrency(params.pricePerOrder)} />
+                        <DataRow label="日营业额" value={formatCurrency(results.revenue.daily)} highlight />
+                        <DataRow label="月营业额" value={formatCurrency(results.revenue.monthly)} />
+                        <DataRow label="年营业额" value={formatCurrency(results.revenue.yearly)} />
+                    </DataSection>
+
+                    <DataSection title="收入分成明细">
+                        <DataRow label="场地分成" value={`${params.venueCommission}% - ${formatCurrency(results.revenue.daily * params.venueCommission / 100)}/天`} />
+                        <DataRow label="支付手续费" value={`${params.paymentFee}% - ${formatCurrency(results.revenue.daily * params.paymentFee / 100)}/天`} />
+                        {params.supplierCommission > 0 && (
+                            <DataRow label="供应商分成" value={`${params.supplierCommission}% - ${formatCurrency(results.revenue.daily * params.supplierCommission / 100)}/天`} />
+                        )}
+                        <DataRow label="总分成比例" value={`${formatNumber(totalCommission, 1)}%`} />
+                        <DataRow label="总分成金额" value={formatCurrency(commissionAmount)} />
+                        <DataRow label="实际到账收入" value={formatCurrency(results.profit.dailyGross)} highlight />
+                    </DataSection>
+                </div>
+            );
+        }
+
+        // ========== 成本分析Tab ==========
+        function CostTab({ results, params, formatNumber, formatCurrency }) {
+            return (
+                <div className="space-y-6">
+                    <DataSection title="初始投资构成 (CAPEX)">
+                        <DataRow label="设备成本" value={formatCurrency(params.deviceCost * params.sites)} />
+                        <DataRow label="物流成本" value={formatCurrency(params.logisticsCost * params.sites)} />
+                        <DataRow label="软件许可费" value={formatCurrency(params.softwareLicense)} />
+                        <DataRow label="营销推广费" value={formatCurrency(params.marketingCost)} />
+                        <DataRow label="初始投资总额" value={formatCurrency(results.costs.initial)} highlight />
+                    </DataSection>
+
+                    <DataSection title="日运营成本明细 (OPEX)">
+                        <DataRow label="人工成本" value={formatCurrency(params.dailyLaborCost)} />
+                        <DataRow label="通信成本" value={formatCurrency(params.dailyCommCost)} />
+                        <DataRow label="系统维护费" value={formatCurrency(params.dailyMaintenanceCost)} />
+                        <DataRow label="设备损耗" value={formatCurrency(params.deviceWearCost * results.revenue.dailyOrders)} />
+                        <DataRow label="日运营成本总计" value={formatCurrency(results.costs.dailyOperating)} highlight />
+                    </DataSection>
+
+                    <DataSection title="成本占比分析">
+                        <DataRow
+                            label="运营成本占营业额比"
+                            value={`${formatNumber((results.costs.dailyOperating / results.revenue.daily) * 100, 1)}%`}
+                        />
+                        <DataRow
+                            label="单站每日成本"
+                            value={formatCurrency(results.costs.dailyOperating / params.sites)}
+                        />
+                        <DataRow
+                            label="单单平均成本"
+                            value={formatCurrency(results.costs.dailyOperating / results.revenue.dailyOrders)}
+                        />
+                    </DataSection>
+                </div>
+            );
+        }
+
+        // ========== 利润分析Tab ==========
+        function ProfitTab({ results, formatNumber, formatCurrency }) {
+            return (
+                <div className="space-y-6">
+                    <DataSection title="利润明细">
+                        <DataRow label="日营业额" value={formatCurrency(results.revenue.daily)} />
+                        <DataRow label="日毛收入" value={formatCurrency(results.profit.dailyGross)} />
+                        <DataRow label="日运营成本" value={formatCurrency(results.costs.dailyOperating)} />
+                        <DataRow label="日净利润" value={formatCurrency(results.profit.dailyNet)} highlight />
+                        <DataRow label="月净利润" value={formatCurrency(results.profit.monthlyNet)} highlight />
+                        <DataRow label="年净利润" value={formatCurrency(results.profit.yearlyNet)} highlight />
+                    </DataSection>
+
+                    <DataSection title="利润率指标">
+                        <DataRow label="毛利率" value={`${formatNumber(results.metrics.grossMargin, 2)}%`} />
+                        <DataRow label="净利率" value={`${formatNumber(results.metrics.netMargin, 2)}%`} />
+                        <DataRow
+                            label="边际贡献率"
+                            value={`${formatNumber(100 - (results.costs.dailyOperating / results.revenue.daily) * 100, 2)}%`}
+                        />
+                    </DataSection>
+
+                    <DataSection title="现金流分析">
+                        <DataRow label="初始投资" value={formatCurrency(results.costs.initial)} />
+                        <DataRow label="月现金流入" value={formatCurrency(results.profit.monthlyNet)} />
+                        <DataRow label="年现金流入" value={formatCurrency(results.profit.yearlyNet)} />
+                        <DataRow
+                            label="3年累计现金流"
+                            value={formatCurrency(results.profit.yearlyNet * 3 - results.costs.initial)}
+                            highlight
+                        />
+                    </DataSection>
+                </div>
+            );
+        }
+
+        // ========== 可视化Tab ==========
+        function ChartsTab({ results, params }) {
+            const revenueChartRef = useRef(null);
+            const costChartRef = useRef(null);
+            const profitChartRef = useRef(null);
+            const paybackChartRef = useRef(null);
+
+            useEffect(() => {
+                // 收益曲线图
+                if (revenueChartRef.current) {
+                    const ctx = revenueChartRef.current.getContext('2d');
+                    const months = Array.from({ length: 24 }, (_, i) => i + 1);
+                    const cumulativeProfit = months.map(m => results.profit.monthlyNet * m - results.costs.initial);
+
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: months.map(m => `${m}月`),
+                            datasets: [{
+                                label: '累计净利润',
+                                data: cumulativeProfit,
+                                borderColor: '#667EEA',
+                                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                                fill: true,
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: '24个月累计收益趋势',
+                                    font: { size: 16, weight: 'bold' }
+                                },
+                                legend: { display: true }
+                            },
+                            scales: {
+                                y: {
+                                    ticks: {
+                                        callback: (value) => '¥' + value.toLocaleString()
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // 成本构成饼图
+                if (costChartRef.current) {
+                    const ctx = costChartRef.current.getContext('2d');
+                    new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['设备成本', '物流成本', '软件许可', '营销费用'],
+                            datasets: [{
+                                data: [
+                                    params.deviceCost * params.sites,
+                                    params.logisticsCost * params.sites,
+                                    params.softwareLicense,
+                                    params.marketingCost
+                                ],
+                                backgroundColor: ['#667EEA', '#764BA2', '#4CAF50', '#FF9800']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: '初始投资构成',
+                                    font: { size: 16, weight: 'bold' }
+                                },
+                                legend: { position: 'bottom' }
+                            }
+                        }
+                    });
+                }
+
+                // 利润分解条形图
+                if (profitChartRef.current) {
+                    const ctx = profitChartRef.current.getContext('2d');
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['日', '月', '年'],
+                            datasets: [
+                                {
+                                    label: '营业额',
+                                    data: [results.revenue.daily, results.revenue.monthly, results.revenue.yearly],
+                                    backgroundColor: '#667EEA'
+                                },
+                                {
+                                    label: '运营成本',
+                                    data: [results.costs.dailyOperating, results.costs.monthlyOperating, results.costs.yearlyOperating],
+                                    backgroundColor: '#FF9800'
+                                },
+                                {
+                                    label: '净利润',
+                                    data: [results.profit.dailyNet, results.profit.monthlyNet, results.profit.yearlyNet],
+                                    backgroundColor: '#4CAF50'
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: '收入-成本-利润对比',
+                                    font: { size: 16, weight: 'bold' }
+                                },
+                                legend: { position: 'bottom' }
+                            },
+                            scales: {
+                                y: {
+                                    ticks: {
+                                        callback: (value) => '¥' + value.toLocaleString()
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // 盈亏平衡图
+                if (paybackChartRef.current && isFinite(results.metrics.paybackPeriodMonths)) {
+                    const ctx = paybackChartRef.current.getContext('2d');
+                    const months = Array.from({ length: Math.ceil(results.metrics.paybackPeriodMonths) + 6 }, (_, i) => i);
+                    const investment = months.map(m => -results.costs.initial);
+                    const profit = months.map(m => results.profit.monthlyNet * m - results.costs.initial);
+
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: months.map(m => `${m}月`),
+                            datasets: [
+                                {
+                                    label: '初始投资',
+                                    data: investment,
+                                    borderColor: '#F44336',
+                                    borderDash: [5, 5],
+                                    fill: false
+                                },
+                                {
+                                    label: '累计净利润',
+                                    data: profit,
+                                    borderColor: '#4CAF50',
+                                    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                                    fill: true
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: '盈亏平衡分析',
+                                    font: { size: 16, weight: 'bold' }
+                                },
+                                legend: { position: 'bottom' },
+                                annotation: {
+                                    annotations: {
+                                        line1: {
+                                            type: 'line',
+                                            yMin: 0,
+                                            yMax: 0,
+                                            borderColor: '#333',
+                                            borderWidth: 2
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    ticks: {
+                                        callback: (value) => '¥' + value.toLocaleString()
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            }, [results, params]);
+
+            return (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                        <canvas ref={revenueChartRef} height="250"></canvas>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                        <canvas ref={costChartRef} height="250"></canvas>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                        <canvas ref={profitChartRef} height="250"></canvas>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                        <canvas ref={paybackChartRef} height="250"></canvas>
+                    </div>
+                </div>
+            );
+        }
+
+        // ========== 数据区块组件 ==========
+        function DataSection({ title, children }) {
+            return (
+                <div>
+                    <h3 className="text-lg font-bold text-gray-800 mb-4 pb-2 border-b-2 border-primary">
+                        {title}
+                    </h3>
+                    <div className="space-y-3">
+                        {children}
+                    </div>
+                </div>
+            );
+        }
+
+        // ========== 数据行组件 ==========
+        function DataRow({ label, value, highlight }) {
+            return (
+                <div className={`flex justify-between items-center py-2 ${highlight ? 'font-bold text-primary' : ''}`}>
+                    <span className="text-gray-700">{label}</span>
+                    <span className={highlight ? 'text-xl' : 'text-gray-900 font-medium'}>{value}</span>
+                </div>
+            );
+        }
+
+        // ========== 导出按钮组件 ==========
+        function ExportButtons({ results, params }) {
+            const exportToPDF = () => {
+                alert('PDF导出功能开发中...\n\n将包含完整的投资分析报告、关键指标和图表');
+            };
+
+            const exportToExcel = () => {
+                const wb = XLSX.utils.book_new();
+
+                // 创建参数表
+                const paramsData = [
+                    ['参数名称', '数值', '单位'],
+                    ['投放站点数量', params.sites, '个'],
+                    ['每站点日均订单', params.ordersPerSite, '单'],
+                    ['单次租赁价格', params.pricePerOrder, '元'],
+                    ['单站设备成本', params.deviceCost, '元'],
+                    ['场地分成比例', params.venueCommission, '%']
+                ];
+                const wsParams = XLSX.utils.aoa_to_sheet(paramsData);
+                XLSX.utils.book_append_sheet(wb, wsParams, '输入参数');
+
+                // 创建结果表
+                const resultsData = [
+                    ['指标名称', '数值', '单位'],
+                    ['日营业额', results.revenue.daily.toFixed(2), '元'],
+                    ['月营业额', results.revenue.monthly.toFixed(2), '元'],
+                    ['年营业额', results.revenue.yearly.toFixed(2), '元'],
+                    ['初始投资', results.costs.initial.toFixed(2), '元'],
+                    ['月运营成本', results.costs.monthlyOperating.toFixed(2), '元'],
+                    ['月净利润', results.profit.monthlyNet.toFixed(2), '元'],
+                    ['年净利润', results.profit.yearlyNet.toFixed(2), '元'],
+                    ['投资回收期', results.metrics.paybackPeriodMonths.toFixed(1), '月'],
+                    ['年化ROI', results.metrics.annualROI.toFixed(2), '%'],
+                    ['净利率', results.metrics.netMargin.toFixed(2), '%']
+                ];
+                const wsResults = XLSX.utils.aoa_to_sheet(resultsData);
+                XLSX.utils.book_append_sheet(wb, wsResults, '计算结果');
+
+                XLSX.writeFile(wb, `共享充电宝ROI分析_${new Date().toLocaleDateString()}.xlsx`);
+            };
+
+            const exportToImage = () => {
+                alert('图片导出功能开发中...\n\n将生成精美的关键指标卡片图，方便分享');
+            };
+
+            const shareLink = () => {
+                const url = new URL(window.location.href);
+                url.searchParams.set('params', btoa(JSON.stringify(params)));
+
+                navigator.clipboard.writeText(url.toString()).then(() => {
+                    alert('分享链接已复制到剪贴板！');
+                }).catch(() => {
+                    alert('分享链接：\n' + url.toString());
+                });
+            };
+
+            return (
+                <div className="mt-8 pt-6 border-t border-gray-200">
+                    <h3 className="text-lg font-bold text-gray-800 mb-4">导出报告</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <button
+                            onClick={exportToPDF}
+                            className="px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition font-medium flex items-center justify-center gap-2"
+                        >
+                            <span>📄</span> PDF报告
+                        </button>
+                        <button
+                            onClick={exportToExcel}
+                            className="px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition font-medium flex items-center justify-center gap-2"
+                        >
+                            <span>📊</span> Excel表格
+                        </button>
+                        <button
+                            onClick={exportToImage}
+                            className="px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition font-medium flex items-center justify-center gap-2"
+                        >
+                            <span>🖼️</span> 图片分享
+                        </button>
+                        <button
+                            onClick={shareLink}
+                            className="px-4 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition font-medium flex items-center justify-center gap-2"
+                        >
+                            <span>🔗</span> 链接分享
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        // ========== 渲染应用 ==========
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
