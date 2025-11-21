@@ -306,7 +306,8 @@ function get_app_button_styles() {
     /* 移除 YITH 按钮外层可能的边框容器 */
     .yith-ywraq-add-button,
     .yith-ywraq-add-button-container,
-    .yith-ywraq-button-wrapper {
+    .yith-ywraq-button-wrapper,
+    div.yith-ywraq-add-button {
         border: none !important;
         background: transparent !important;
         padding: 0 !important;
@@ -315,16 +316,33 @@ function get_app_button_styles() {
     }
 
     /* 确保按钮内没有额外的容器边框 */
-    .custom-product-buttons-container > * {
+    .custom-product-buttons-container > *,
+    .custom-product-buttons-container > div,
+    .custom-product-buttons-container .yith-ywraq-add-button {
+        border: none !important;
         box-shadow: none !important;
         outline: none !important;
+        background: transparent !important;
+        padding: 0 !important;
     }
 
     /* 移除可能的 woocommerce 容器边框 */
     .single-product div.product form.cart,
-    .single-product div.product .yith-ywraq-add-button {
+    .single-product div.product .yith-ywraq-add-button,
+    .single-product .yith-ywraq-add-button > div,
+    .yith-ywraq-add-button > * {
         border: none !important;
         box-shadow: none !important;
+    }
+
+    /* 强制移除所有可能的父容器边框 */
+    .custom-product-buttons-container [class*="yith"],
+    .custom-product-buttons-container [class*="ywraq"],
+    .custom-product-buttons-container div[class*="button"] {
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+        background: transparent !important;
     }
 
     /* 移动端响应式 - 按钮竖排且全宽 */
