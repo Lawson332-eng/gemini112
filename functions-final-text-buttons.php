@@ -226,10 +226,10 @@ function get_app_button_styles() {
     /* 按钮容器 - 使用 Flexbox 确保并排显示 */
     .custom-product-buttons-container {
         display: flex !important;
-        flex-wrap: wrap;
+        flex-wrap: nowrap !important;
         gap: 12px;
         align-items: center;
-        justify-content: center;
+        justify-content: flex-start;
         margin-top: 20px;
         margin-bottom: 20px;
         border: none !important;
