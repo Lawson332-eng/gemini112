@@ -366,6 +366,7 @@ function get_app_button_styles() {
         .custom-product-buttons-container {
             flex-direction: column;
             align-items: center;
+            gap: 12px;
         }
 
         .custom-product-buttons-container .ios-app-button,
@@ -377,6 +378,7 @@ function get_app_button_styles() {
             max-width: 100%;
             text-align: center;
             flex: 0 0 auto;
+            margin: 0 !important;
         }
     }
 
