@@ -13,20 +13,30 @@ class PowerbankEstimator {
   // Initialize
   async init() {
     try {
-      // Use absolute path for WordPress
-      const baseUrl = window.location.origin + '/wp-content/themes/gempo_child/powerbank-calculator';
-      const response = await fetch(baseUrl + '/data.json');
+      // Use WordPress localized path (passed from functions.php)
+      // Fallback to absolute path if localized variable not available
+      const dataUrl = (typeof powerbankPaths !== 'undefined' && powerbankPaths.dataJsonUrl)
+        ? powerbankPaths.dataJsonUrl
+        : window.location.origin + '/wp-content/themes/gempo_child/powerbank-calculator/data.json';
+
+      console.log('Loading data from:', dataUrl);
+      const response = await fetch(dataUrl);
 
       if (!response.ok) {
-        throw new Error('Failed to load data.json');
+        throw new Error(`Failed to load data.json (Status: ${response.status})`);
       }
 
       this.data = await response.json();
+      console.log('Data loaded successfully:', this.data);
       this.setupEventListeners();
       this.updateUI();
     } catch (error) {
       console.error('Initialization error:', error);
-      alert('Failed to load calculator data. Please refresh the page.');
+      console.error('Error details:', {
+        message: error.message,
+        powerbankPaths: typeof powerbankPaths !== 'undefined' ? powerbankPaths : 'undefined'
+      });
+      alert('Failed to load calculator data. Please check console for details.');
     }
   }
 

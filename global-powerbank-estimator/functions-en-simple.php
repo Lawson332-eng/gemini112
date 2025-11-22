@@ -17,8 +17,19 @@ function powerbank_calculator_en_shortcode() {
         'powerbank-calculator-script',
         get_stylesheet_directory_uri() . '/powerbank-calculator/script-en-only.js',
         array('chartjs', 'jspdf'),
-        '2.0.0',
+        '2.0.1',
         true
+    );
+
+    // Pass data.json URL to JavaScript
+    wp_localize_script(
+        'powerbank-calculator-script',
+        'powerbankPaths',
+        array(
+            'dataJsonUrl' => get_stylesheet_directory_uri() . '/powerbank-calculator/data.json',
+            'themeUrl' => get_stylesheet_directory_uri() . '/powerbank-calculator',
+            'siteUrl' => get_site_url()
+        )
     );
 
     // Load HTML content
