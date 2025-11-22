@@ -361,20 +361,22 @@ function get_app_button_styles() {
         background: transparent !important;
     }
 
-    /* 移动端响应式 - 按钮竖排且全宽 */
+    /* 移动端响应式 - 按钮竖排且等宽 */
     @media (max-width: 768px) {
         .custom-product-buttons-container {
             flex-direction: column;
-            align-items: stretch;
+            align-items: center;
         }
 
         .custom-product-buttons-container .ios-app-button,
         .custom-product-buttons-container .android-app-button,
         .custom-product-buttons-container .yith-ywraq-add-to-quote,
         .custom-product-buttons-container .add-request-quote-button {
-            width: 100%;
+            width: auto !important;
+            min-width: 200px;
+            max-width: 100%;
             text-align: center;
-            flex: 1 1 auto;
+            flex: 0 0 auto;
         }
     }
 
