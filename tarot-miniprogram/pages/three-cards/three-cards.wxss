@@ -1,0 +1,110 @@
+/* pages/three-cards/three-cards.wxss */
+.three-cards-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #000000 0%, #0a0a1a 100%);
+  padding: 40rpx 32rpx;
+}
+
+.cards-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 60rpx;
+}
+
+.step-hint {
+  font-size: 32rpx;
+  color: var(--text-primary);
+  margin-bottom: 40rpx;
+}
+
+.card-placeholder {
+  width: 400rpx;
+  height: 560rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24rpx;
+}
+
+.tap-to-draw {
+  font-size: 32rpx;
+  color: var(--text-primary);
+}
+
+.position-icon {
+  font-size: 120rpx;
+}
+
+.result-display {
+  margin-top: 40rpx;
+}
+
+.three-cards-layout {
+  display: flex;
+  gap: 16rpx;
+  margin-bottom: 40rpx;
+}
+
+.position-card {
+  flex: 1;
+  padding: 24rpx 16rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.position-label {
+  font-size: 24rpx;
+  color: var(--color-primary);
+  margin-bottom: 16rpx;
+}
+
+.mini-card {
+  width: 120rpx;
+  height: 160rpx;
+  background: linear-gradient(135deg, rgba(167, 139, 250, 0.2), rgba(96, 165, 250, 0.2));
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16rpx;
+}
+
+.mini-card-num {
+  font-size: 56rpx;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.position-card-name {
+  font-size: 24rpx;
+  font-weight: 600;
+  margin-bottom: 8rpx;
+}
+
+.position-status {
+  font-size: 20rpx;
+  color: var(--text-tertiary);
+}
+
+.comprehensive-meaning {
+  padding: 32rpx;
+  margin-bottom: 32rpx;
+}
+
+.meaning-title {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-bottom: 16rpx;
+}
+
+.meaning-text {
+  font-size: 28rpx;
+  line-height: 1.8;
+  color: var(--text-secondary);
+}

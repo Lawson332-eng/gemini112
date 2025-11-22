@@ -1,0 +1,47 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/single-card/single-card",
+    "pages/three-cards/three-cards",
+    "pages/card-library/card-library",
+    "pages/card-detail/card-detail",
+    "pages/history/history"
+  ],
+  "window": {
+    "navigationBarTitleText": "塔罗预言",
+    "navigationBarBackgroundColor": "#0a0a0a",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#000000",
+    "backgroundTextStyle": "light",
+    "enablePullDownRefresh": false
+  },
+  "tabBar": {
+    "color": "#8b8b8b",
+    "selectedColor": "#a78bfa",
+    "backgroundColor": "#0a0a0a",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "static/icons/home.png",
+        "selectedIconPath": "static/icons/home-active.png"
+      },
+      {
+        "pagePath": "pages/card-library/card-library",
+        "text": "牌库",
+        "iconPath": "static/icons/cards.png",
+        "selectedIconPath": "static/icons/cards-active.png"
+      },
+      {
+        "pagePath": "pages/history/history",
+        "text": "记录",
+        "iconPath": "static/icons/history.png",
+        "selectedIconPath": "static/icons/history-active.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

@@ -1,0 +1,28 @@
+<!--pages/card-library/card-library.wxml-->
+<view class="container card-library-page">
+  <!-- 筛选器 -->
+  <view class="filter-section">
+    <view class="filter-tabs">
+      <view class="tab {{activeFilter === 'all' ? 'active' : ''}}" bindtap="filterCards" data-type="all">
+        全部(78)
+      </view>
+      <view class="tab {{activeFilter === 'major' ? 'active' : ''}}" bindtap="filterCards" data-type="major">
+        大阿卡纳(22)
+      </view>
+      <view class="tab {{activeFilter === 'minor' ? 'active' : ''}}" bindtap="filterCards" data-type="minor">
+        小阿卡纳(56)
+      </view>
+    </view>
+  </view>
+
+  <!-- 卡牌网格 -->
+  <scroll-view scroll-y class="cards-grid">
+    <view class="card-item glass-card" wx:for="{{filteredCards}}" wx:key="id" bindtap="viewCardDetail" data-id="{{item.id}}">
+      <view class="card-placeholder">
+        <text class="card-number-display">{{item.number}}</text>
+      </view>
+      <text class="card-name">{{item.name}}</text>
+      <text class="card-name-en">{{item.nameEn}}</text>
+    </view>
+  </scroll-view>
+</view>

@@ -1,0 +1,86 @@
+<!--pages/index/index.wxml-->
+<view class="container index-page">
+  <!-- 顶部标题区 -->
+  <view class="header fade-in">
+    <text class="app-title gradient-text">塔罗预言</text>
+    <text class="app-subtitle">倾听内心的声音</text>
+  </view>
+
+  <!-- 每日一卡区域 -->
+  <view class="daily-card-section fade-in">
+    <view class="section-title">
+      <text class="title-icon">✨</text>
+      <text class="title-text">每日一卡</text>
+    </view>
+
+    <view class="daily-card-container glass-card glow-animation" bindtap="viewDailyCard">
+      <view wx:if="{{dailyCard}}" class="daily-card-content">
+        <!-- 卡牌图片占位 -->
+        <view class="card-image-placeholder">
+          <text class="card-number">{{dailyCard.number}}</text>
+          <text class="card-type">{{dailyCard.type === 'major' ? '大阿卡纳' : '小阿卡纳'}}</text>
+        </view>
+
+        <!-- 卡牌信息 -->
+        <view class="card-info">
+          <text class="card-name">{{dailyCard.name}}</text>
+          <text class="card-name-en">{{dailyCard.nameEn}}</text>
+          <view class="card-keywords">
+            <text wx:for="{{dailyCard.keywords}}" wx:key="index" class="keyword">
+              {{item}}
+            </text>
+          </view>
+          <text class="card-position">{{dailyCard.isReversed ? '逆位' : '正位'}}</text>
+        </view>
+      </view>
+
+      <view wx:else class="daily-card-loading">
+        <text class="pulse">正在为您抽取今日塔罗...</text>
+      </view>
+    </view>
+
+    <text class="daily-tip">点击查看详细解读</text>
+  </view>
+
+  <!-- 占卜方式选择区 -->
+  <view class="divination-section fade-in">
+    <view class="section-title mb-md">
+      <text class="title-icon">🔮</text>
+      <text class="title-text">开始占卜</text>
+    </view>
+
+    <view class="divination-grid">
+      <!-- 单牌占卜 -->
+      <view class="divination-card glass-card" bindtap="goToSingleCard">
+        <view class="card-icon">🎴</view>
+        <text class="card-title">单牌占卜</text>
+        <text class="card-desc">抽取一张塔罗牌\n获得当下的指引</text>
+      </view>
+
+      <!-- 三牌阵占卜 -->
+      <view class="divination-card glass-card" bindtap="goToThreeCards">
+        <view class="card-icon">🌟</view>
+        <text class="card-title">三牌阵占卜</text>
+        <text class="card-desc">过去·现在·未来\n揭示时间的奥秘</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 快捷入口区 -->
+  <view class="quick-links fade-in">
+    <view class="link-item" bindtap="goToCardLibrary">
+      <text class="link-icon">📚</text>
+      <text class="link-text">牌库浏览</text>
+    </view>
+
+    <view class="link-item" bindtap="goToHistory">
+      <text class="link-icon">📜</text>
+      <text class="link-text">历史记录</text>
+    </view>
+  </view>
+
+  <!-- 底部装饰 -->
+  <view class="footer">
+    <text class="footer-text">—— 愿塔罗指引你的人生旅程 ——</text>
+  </view>
+</view>

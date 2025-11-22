@@ -1,0 +1,64 @@
+<!--pages/card-detail/card-detail.wxml-->
+<view class="container card-detail-page">
+  <view class="card-header glass-card">
+    <view class="card-image">
+      <text class="card-display-num">{{card.number}}</text>
+    </view>
+    <view class="card-basic-info">
+      <text class="detail-card-name">{{card.name}}</text>
+      <text class="detail-card-name-en">{{card.nameEn}}</text>
+      <text class="card-category">{{card.type === 'major' ? '大阿卡纳' : '小阿卡纳'}}</text>
+    </view>
+  </view>
+
+  <view class="keywords-section glass-card">
+    <text class="section-title">✨ 关键词</text>
+    <view class="keywords-grid">
+      <text wx:for="{{card.keywords}}" wx:key="index" class="keyword-item">{{item}}</text>
+    </view>
+  </view>
+
+  <view class="meaning-section glass-card">
+    <text class="section-title">🔮 正位含义</text>
+    <view class="meaning-content">
+      <view class="meaning-item">
+        <text class="item-label">总体含义</text>
+        <text class="item-text">{{uprightMeaning.general}}</text>
+      </view>
+      <view class="meaning-item">
+        <text class="item-label">爱情运势</text>
+        <text class="item-text">{{uprightMeaning.love}}</text>
+      </view>
+      <view class="meaning-item">
+        <text class="item-label">事业运势</text>
+        <text class="item-text">{{uprightMeaning.career}}</text>
+      </view>
+      <view class="meaning-item">
+        <text class="item-label">建议</text>
+        <text class="item-text">{{uprightMeaning.advice}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="meaning-section glass-card">
+    <text class="section-title">🌙 逆位含义</text>
+    <view class="meaning-content">
+      <view class="meaning-item">
+        <text class="item-label">总体含义</text>
+        <text class="item-text">{{reversedMeaning.general}}</text>
+      </view>
+      <view class="meaning-item">
+        <text class="item-label">爱情运势</text>
+        <text class="item-text">{{reversedMeaning.love}}</text>
+      </view>
+      <view class="meaning-item">
+        <text class="item-label">事业运势</text>
+        <text class="item-text">{{reversedMeaning.career}}</text>
+      </view>
+      <view class="meaning-item">
+        <text class="item-label">建议</text>
+        <text class="item-text">{{reversedMeaning.advice}}</text>
+      </view>
+    </view>
+  </view>
+</view>

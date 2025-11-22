@@ -1,0 +1,38 @@
+<!--pages/three-cards/three-cards.wxml-->
+<view class="container three-cards-page">
+  <view class="title-section fade-in">
+    <text class="page-title gradient-text">三牌阵占卜</text>
+    <text class="page-subtitle">过去·现在·未来</text>
+  </view>
+
+  <view class="cards-container" wx:if="{{step < 3}}">
+    <text class="step-hint">{{stepHints[step]}}</text>
+    <view class="card-placeholder glass-card glow-animation" bindtap="drawNextCard">
+      <text class="tap-to-draw">点击抽牌</text>
+      <text class="position-icon">{{positionIcons[step]}}</text>
+    </view>
+  </view>
+
+  <view class="result-display fade-in" wx:if="{{step === 3}}">
+    <view class="three-cards-layout">
+      <view class="position-card glass-card" wx:for="{{drawnCards}}" wx:key="position">
+        <text class="position-label">{{item.positionName}}</text>
+        <view class="mini-card">
+          <text class="mini-card-num">{{item.number}}</text>
+        </view>
+        <text class="position-card-name">{{item.name}}</text>
+        <text class="position-status">{{item.isReversed ? '逆位' : '正位'}}</text>
+      </view>
+    </view>
+
+    <view class="comprehensive-meaning glass-card">
+      <text class="meaning-title">🔮 综合解读</text>
+      <text class="meaning-text">这三张牌揭示了你生命历程的脉络。{{overallMeaning}}</text>
+    </view>
+
+    <view class="action-buttons">
+      <button class="btn-secondary" bindtap="reset">重新占卜</button>
+      <button class="btn-primary" bindtap="saveRecord">保存记录</button>
+    </view>
+  </view>
+</view>

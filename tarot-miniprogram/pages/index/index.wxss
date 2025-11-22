@@ -1,0 +1,278 @@
+/* pages/index/index.wxss */
+
+.index-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #000000 0%, #0a0a1a 100%);
+  padding: 40rpx 32rpx;
+  padding-bottom: 120rpx;
+}
+
+/* 头部标题 */
+.header {
+  text-align: center;
+  margin-bottom: 60rpx;
+}
+
+.app-title {
+  display: block;
+  font-size: 64rpx;
+  font-weight: 700;
+  letter-spacing: 8rpx;
+  margin-bottom: 16rpx;
+}
+
+.app-subtitle {
+  display: block;
+  font-size: 28rpx;
+  color: var(--text-secondary);
+  font-weight: 300;
+  letter-spacing: 4rpx;
+}
+
+/* 每日一卡区域 */
+.daily-card-section {
+  margin-bottom: 60rpx;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24rpx;
+}
+
+.title-icon {
+  font-size: 32rpx;
+  margin-right: 12rpx;
+}
+
+.title-text {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.daily-card-container {
+  padding: 40rpx;
+  min-height: 320rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.daily-card-content {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.card-image-placeholder {
+  width: 200rpx;
+  height: 280rpx;
+  background: linear-gradient(135deg, rgba(167, 139, 250, 0.2), rgba(96, 165, 250, 0.2));
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-right: 32rpx;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-image-placeholder::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, transparent 0%, rgba(167, 139, 250, 0.1) 50%, transparent 100%);
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.card-number {
+  font-size: 72rpx;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 8rpx;
+}
+
+.card-type {
+  font-size: 20rpx;
+  color: var(--text-tertiary);
+}
+
+.card-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-name {
+  font-size: 40rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8rpx;
+}
+
+.card-name-en {
+  font-size: 24rpx;
+  color: var(--text-secondary);
+  margin-bottom: 20rpx;
+  font-style: italic;
+}
+
+.card-keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-bottom: 20rpx;
+}
+
+.keyword {
+  padding: 6rpx 16rpx;
+  background: rgba(167, 139, 250, 0.15);
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  border-radius: 24rpx;
+  font-size: 22rpx;
+  color: var(--color-primary);
+}
+
+.card-position {
+  display: inline-block;
+  padding: 8rpx 20rpx;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  border-radius: 24rpx;
+  font-size: 24rpx;
+  color: var(--text-primary);
+  font-weight: 500;
+  align-self: flex-start;
+}
+
+.daily-card-loading {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 28rpx;
+}
+
+.daily-tip {
+  display: block;
+  text-align: center;
+  margin-top: 16rpx;
+  font-size: 24rpx;
+  color: var(--text-tertiary);
+}
+
+/* 占卜方式选择 */
+.divination-section {
+  margin-bottom: 60rpx;
+}
+
+.divination-grid {
+  display: flex;
+  gap: 24rpx;
+}
+
+.divination-card {
+  flex: 1;
+  padding: 40rpx 24rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.divination-card:active {
+  transform: scale(0.95);
+}
+
+.card-icon {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+}
+
+.card-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 16rpx;
+}
+
+.card-desc {
+  font-size: 24rpx;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+/* 快捷入口 */
+.quick-links {
+  display: flex;
+  gap: 24rpx;
+  margin-bottom: 60rpx;
+}
+
+.link-item {
+  flex: 1;
+  padding: 32rpx 24rpx;
+  background: rgba(26, 26, 26, 0.4);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+  transition: all 0.3s ease;
+}
+
+.link-item:active {
+  transform: translateY(2px);
+  border-color: var(--border-hover);
+}
+
+.link-icon {
+  font-size: 48rpx;
+}
+
+.link-text {
+  font-size: 28rpx;
+  color: var(--text-primary);
+}
+
+/* 底部装饰 */
+.footer {
+  text-align: center;
+  padding: 40rpx 0;
+}
+
+.footer-text {
+  font-size: 24rpx;
+  color: var(--text-tertiary);
+  font-weight: 300;
+  letter-spacing: 2rpx;
+}
+
+/* 响应式适配 */
+@media (max-width: 375px) {
+  .daily-card-content {
+    flex-direction: column;
+  }
+
+  .card-image-placeholder {
+    margin-right: 0;
+    margin-bottom: 24rpx;
+  }
+
+  .card-info {
+    align-items: center;
+    text-align: center;
+  }
+}

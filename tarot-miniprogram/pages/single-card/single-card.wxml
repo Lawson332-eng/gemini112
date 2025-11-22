@@ -1,0 +1,40 @@
+<!--pages/single-card/single-card.wxml-->
+<view class="container single-card-page">
+  <view class="title-section fade-in">
+    <text class="page-title gradient-text">单牌占卜</text>
+    <text class="page-subtitle">专注当下,倾听内心的声音</text>
+  </view>
+
+  <view class="card-display" wx:if="{{!card}}">
+    <view class="card-back glass-card glow-animation" bindtap="drawCard">
+      <text class="draw-hint">点击抽牌</text>
+      <text class="card-icon">🎴</text>
+    </view>
+  </view>
+
+  <view class="card-result fade-in" wx:if="{{card}}">
+    <view class="card-visual glass-card">
+      <text class="card-num">{{card.number}}</text>
+      <text class="card-orientation">{{card.isReversed ? '逆位' : '正位'}}</text>
+    </view>
+
+    <view class="card-info-section">
+      <text class="result-card-name">{{card.name}}</text>
+      <text class="result-card-name-en">{{card.nameEn}}</text>
+
+      <view class="keywords-list">
+        <text wx:for="{{card.keywords}}" wx:key="index" class="keyword-tag">{{item}}</text>
+      </view>
+
+      <view class="meaning-section glass-card">
+        <text class="meaning-title">✨ 牌面含义</text>
+        <text class="meaning-text">{{meaning.general}}</text>
+      </view>
+
+      <view class="action-buttons">
+        <button class="btn-secondary" bindtap="reset">重新抽牌</button>
+        <button class="btn-primary" bindtap="saveRecord">保存记录</button>
+      </view>
+    </view>
+  </view>
+</view>

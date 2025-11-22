@@ -1,0 +1,33 @@
+<!--pages/history/history.wxml-->
+<view class="container history-page">
+  <view class="header-section">
+    <text class="page-title gradient-text">占卜记录</text>
+    <button wx:if="{{historyList.length > 0}}" class="clear-btn" bindtap="clearHistory">清空</button>
+  </view>
+
+  <view wx:if="{{historyList.length === 0}}" class="empty-state">
+    <text class="empty-icon">📜</text>
+    <text class="empty-text">暂无占卜记录</text>
+    <text class="empty-hint">开始你的第一次塔罗占卜吧</text>
+  </view>
+
+  <scroll-view wx:else scroll-y class="history-list">
+    <view class="history-item glass-card" wx:for="{{historyList}}" wx:key="timestamp" bindtap="viewDetail" data-index="{{index}}">
+      <view class="item-header">
+        <text class="item-type">{{item.type === 'single' ? '单牌占卜' : '三牌阵占卜'}}</text>
+        <text class="item-time">{{item.relativeTime}}</text>
+      </view>
+
+      <view class="item-cards">
+        <view class="mini-preview" wx:for="{{item.cards}}" wx:for-item="card" wx:key="id">
+          <text class="preview-num">{{card.number}}</text>
+          <text class="preview-name">{{card.name}}</text>
+        </view>
+      </view>
+
+      <view class="item-actions">
+        <button class="delete-btn" catchtap="deleteRecord" data-timestamp="{{item.timestamp}}">删除</button>
+      </view>
+    </view>
+  </scroll-view>
+</view>

@@ -1,0 +1,1 @@
+# 塔罗牌图片说明\n\n请将78张塔罗牌图片放入此目录:\n- major/ 目录: 22张大阿卡纳图片 (00-fool.png 到 21-world.png)\n- minor/ 目录: 56张小阿卡纳图片\n  - wands-01.png 到 wands-king.png (权杖14张)\n  - cups-01.png 到 cups-king.png (圣杯14张)\n  - swords-01.png 到 swords-king.png (宝剑14张)\n  - pentacles-01.png 到 pentacles-king.png (星币14张)\n\n建议尺寸: 750x1050 像素或等比例
