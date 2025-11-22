@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="全球共享充电宝市场容量预估工具 - 基于城市人口、经济与场景的智能预估系统">
+    <meta name="keywords" content="共享充电宝,市场预估,容量计算,power bank,market estimator">
+    <meta property="og:title" content="全球共享充电宝市场容量预估工具">
+    <meta property="og:description" content="基于城市人口、经济与场景的智能预估系统">
+    <meta property="og:type" content="website">
+
+    <title>全球共享充电宝市场容量预估工具</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #070346;
+            --secondary: #FE714C;
+            --accent: #E6F0EC;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .primary-bg { background-color: var(--primary); }
+        .secondary-bg { background-color: var(--secondary); }
+        .accent-bg { background-color: var(--accent); }
+
+        .primary-text { color: var(--primary); }
+        .secondary-text { color: var(--secondary); }
+
+        .primary-border { border-color: var(--primary); }
+        .secondary-border { border-color: var(--secondary); }
+
+        .step-indicator {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #666;
+        }
+
+        .step-indicator.active {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .result-card {
+            border-left: 4px solid var(--secondary);
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn-primary {
+            background: var(--secondary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            background: #e66043;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(254, 113, 76, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--primary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: #050228;
+            transform: translateY(-2px);
+        }
+
+        .input-field {
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 10px 14px;
+            transition: border-color 0.3s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--secondary);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 250px;
+            }
+        }
+
+        .lang-btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .lang-btn:hover {
+            background: var(--accent);
+        }
+
+        .lang-btn.active {
+            background: var(--secondary);
+            color: white;
+        }
+    </style>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#070346',
+                        secondary: '#FE714C',
+                        accent: '#E6F0EC'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Language Switcher -->
+    <div class="fixed top-4 right-4 z-50 flex gap-2">
+        <button class="lang-btn active" data-lang="zh-CN">中文</button>
+        <button class="lang-btn" data-lang="en-US">EN</button>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold primary-text mb-4" data-i18n="title">
+                全球共享充电宝市场容量预估工具
+            </h1>
+            <p class="text-xl text-gray-600" data-i18n="subtitle">
+                基于城市人口、经济与场景的智能预估系统
+            </p>
+        </div>
+
+        <!-- Form Container -->
+        <div id="formContainer">
+            <!-- Step Indicators -->
+            <div class="flex justify-center items-center mb-8 gap-4">
+                <div class="flex items-center gap-2">
+                    <div class="step-indicator active" data-step="1">1</div>
+                    <span class="hidden md:inline text-sm" data-i18n="step1">基础信息</span>
+                </div>
+                <div class="h-0.5 w-8 md:w-16 bg-gray-300"></div>
+                <div class="flex items-center gap-2">
+                    <div class="step-indicator" data-step="2">2</div>
+                    <span class="hidden md:inline text-sm" data-i18n="step2">人口与经济</span>
+                </div>
+                <div class="h-0.5 w-8 md:w-16 bg-gray-300"></div>
+                <div class="flex items-center gap-2">
+                    <div class="step-indicator" data-step="3">3</div>
+                    <span class="hidden md:inline text-sm" data-i18n="step3">商业与场景</span>
+                </div>
+                <div class="h-0.5 w-8 md:w-16 bg-gray-300"></div>
+                <div class="flex items-center gap-2">
+                    <div class="step-indicator" data-step="4">4</div>
+                    <span class="hidden md:inline text-sm" data-i18n="step4">高级选项</span>
+                </div>
+            </div>
+
+            <!-- Form -->
+            <form id="calculatorForm" class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+
+                <!-- Reference City Quick Fill -->
+                <div class="mb-6 p-4 accent-bg rounded-lg">
+                    <label class="block text-sm font-medium mb-2" data-i18n="referenceCities">参考城市</label>
+                    <select id="referenceCity" class="w-full input-field">
+                        <option value="" data-i18n="quickFill">快速填充</option>
+                    </select>
+                </div>
+
+                <!-- Step 1: Basic Info -->
+                <div id="step1">
+                    <h2 class="text-2xl font-bold primary-text mb-6" data-i18n="step1">步骤 1: 基础信息</h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-2" data-i18n="cityName">城市名称</label>
+                            <input type="text" id="cityName" class="w-full input-field"
+                                   data-i18n-placeholder="cityNamePlaceholder" placeholder="例如: 深圳" required>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium mb-2" data-i18n="country">国家/地区</label>
+                            <select id="country" class="w-full input-field" required>
+                                <option value="" data-i18n="selectCountry">请选择国家</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Population & Economy -->
+                <div id="step2" class="hidden">
+                    <h2 class="text-2xl font-bold primary-text mb-6" data-i18n="step2">步骤 2: 人口与经济</h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-2" data-i18n="population">常住人口 (万人)</label>
+                            <input type="number" id="population" class="w-full input-field"
+                                   min="1" step="0.1" required>
+                            <p class="text-xs text-gray-500 mt-1" data-i18n="wikiHint">提示：可在Wikipedia查询</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium mb-2" data-i18n="area">城市行政区面积 (km²)</label>
+                            <input type="number" id="area" class="w-full input-field"
+                                   min="1" step="0.1" required>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium mb-2" data-i18n="gdp">人均GDP (美元)</label>
+                            <input type="number" id="gdp" class="w-full input-field"
+                                   min="1000" step="100" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Commercial & Scenarios -->
+                <div id="step3" class="hidden">
+                    <h2 class="text-2xl font-bold primary-text mb-6" data-i18n="step3">步骤 3: 商业与场景</h2>
+
+                    <div class="grid grid-cols-1 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-2" data-i18n="malls">大型商业综合体数量</label>
+                            <input type="number" id="malls" class="w-full input-field"
+                                   min="0" max="50" step="1" value="0" required>
+                            <p class="text-xs text-gray-500 mt-1" data-i18n="mallsHint">
+                                日均客流10万+的购物中心/CBD数量
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Advanced Options -->
+                <div id="step4" class="hidden">
+                    <h2 class="text-2xl font-bold primary-text mb-6" data-i18n="step4">步骤 4: 高级选项</h2>
+
+                    <div class="grid grid-cols-1 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-2" data-i18n="mobilePay">
+                                移动支付普及率 (%)
+                            </label>
+                            <div class="flex items-center gap-4">
+                                <input type="range" id="mobilePay" class="flex-1"
+                                       min="0" max="100" step="1" value="50">
+                                <span id="mobilePayValue" class="font-bold w-12 text-right">50%</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium mb-2" data-i18n="climate">气候类型</label>
+                            <select id="climate" class="w-full input-field">
+                                <option value="tropical" data-i18n="tropical">热带/亚热带</option>
+                                <option value="temperate" selected data-i18n="temperate">温带</option>
+                                <option value="cold" data-i18n="cold">寒带/高原</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium mb-2" data-i18n="urbanRatio">
+                                城区人口占比 (%)
+                            </label>
+                            <div class="flex items-center gap-4">
+                                <input type="range" id="urbanRatio" class="flex-1"
+                                       min="10" max="100" step="1" value="70">
+                                <span id="urbanRatioValue" class="font-bold w-12 text-right">70%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="flex justify-between mt-8">
+                    <button type="button" id="prevBtn" class="btn-secondary" disabled data-i18n="previous">
+                        上一步
+                    </button>
+
+                    <div class="flex gap-3">
+                        <button type="button" id="resetBtn" class="px-6 py-2 text-gray-600 hover:text-gray-800">
+                            <span data-i18n="reset">重置</span>
+                        </button>
+                        <button type="button" id="nextBtn" class="btn-primary" data-i18n="next">
+                            下一步
+                        </button>
+                        <button type="button" id="calculateBtn" class="btn-primary hidden" data-i18n="calculate">
+                            开始计算
+                        </button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+
+        <!-- Results Container -->
+        <div id="resultContainer" class="hidden">
+
+            <!-- Result Header -->
+            <div class="bg-white rounded-lg shadow-lg p-6 md:p-8 mb-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold primary-text" data-i18n="resultTitle">预估结果</h2>
+                    <button id="backToForm" class="btn-secondary" onclick="window.estimator.reset()">
+                        <span data-i18n="reset">重新计算</span>
+                    </button>
+                </div>
+
+                <!-- Core Metrics -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <!-- Total Devices Card -->
+                    <div class="result-card p-6 rounded-lg">
+                        <div class="text-gray-600 text-sm mb-2" data-i18n="totalDevices">预估设备总量</div>
+                        <div class="text-4xl font-bold secondary-text" id="totalDevicesValue">0</div>
+                        <div class="text-gray-500 text-sm mt-1" id="totalDevicesUnits"></div>
+                    </div>
+
+                    <!-- Device Density Card -->
+                    <div class="result-card p-6 rounded-lg">
+                        <div class="text-gray-600 text-sm mb-2" data-i18n="deviceDensity">设备密度</div>
+                        <div class="text-4xl font-bold secondary-text" id="densityValue">0</div>
+                        <div class="text-gray-500 text-sm mt-1" id="densityBaseline"></div>
+                        <div class="text-2xl mt-2" id="densityRating">⭐⭐⭐⭐⭐</div>
+                    </div>
+                </div>
+
+                <!-- Calculation Details -->
+                <div class="bg-gray-50 rounded-lg p-6 mb-6">
+                    <h3 class="text-xl font-bold primary-text mb-4" data-i18n="calculationDetails">
+                        📊 计算明细
+                    </h3>
+                    <div class="border-b border-gray-300 mb-4"></div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <span class="text-gray-600" data-i18n="urbanPopulation">城区人口:</span>
+                            <span class="font-bold ml-2" id="urbanPopValue">-</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600" data-i18n="baselineDensity">基准密度:</span>
+                            <span class="font-bold ml-2" id="baselineValue">-</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <div class="text-gray-700 font-medium mb-2" data-i18n="coefficients">系数组成:</div>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                            <div class="flex justify-between">
+                                <span data-i18n="cityLevelCoef">城市等级系数:</span>
+                                <span class="font-bold" id="cityLevelValue">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span data-i18n="economicCoef">经济系数:</span>
+                                <span class="font-bold" id="economicValue">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span data-i18n="densityCoef">人口密度系数:</span>
+                                <span class="font-bold" id="densityValue2">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span data-i18n="commercialCoef">商业场景系数:</span>
+                                <span class="font-bold" id="commercialValue">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span data-i18n="mobilePayCoef">移动支付系数:</span>
+                                <span class="font-bold" id="mobilePayValue2">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span data-i18n="climateCoef">气候系数:</span>
+                                <span class="font-bold" id="climateValue">-</span>
+                            </div>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-gray-300 flex justify-between">
+                            <span class="font-bold" data-i18n="compositeCoef">综合系数:</span>
+                            <span class="font-bold text-lg secondary-text" id="compositeValue">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-white rounded-lg p-4 shadow">
+                        <h3 class="text-lg font-bold mb-4" data-i18n="chartTitle">系数贡献分析</h3>
+                        <div class="chart-container">
+                            <canvas id="radarChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-4 shadow">
+                        <h3 class="text-lg font-bold mb-4" data-i18n="comparisonTitle">与参考城市对比</h3>
+                        <div class="chart-container">
+                            <canvas id="comparisonChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Market Analysis -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-lg p-6 shadow">
+                        <h3 class="text-lg font-bold primary-text mb-4" data-i18n="marketRating">市场评级</h3>
+                        <div class="text-2xl font-bold secondary-text" id="marketRatingValue">⭐⭐⭐⭐⭐</div>
+
+                        <div class="mt-4">
+                            <h4 class="font-bold mb-2" data-i18n="marketFeatures">市场特征:</h4>
+                            <div class="text-sm" id="marketFeatures"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-6 shadow">
+                        <h3 class="text-lg font-bold primary-text mb-4" data-i18n="suggestions">建议</h3>
+                        <ul class="list-disc list-inside text-sm space-y-2" id="marketSuggestions"></ul>
+                    </div>
+                </div>
+
+                <!-- Export Buttons -->
+                <div class="flex flex-wrap gap-4 mt-8 justify-center">
+                    <button id="downloadPDF" class="btn-primary">
+                        <span data-i18n="downloadPDF">📄 下载PDF报告</span>
+                    </button>
+                    <button id="downloadExcel" class="btn-secondary">
+                        <span data-i18n="downloadExcel">📊 导出Excel</span>
+                    </button>
+                    <button id="shareLink" class="btn-primary">
+                        <span data-i18n="shareLink">🔗 分享链接</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Load External Scripts -->
+    <script src="script.js"></script>
+
+    <script>
+        // Update slider values display
+        document.getElementById('mobilePay')?.addEventListener('input', (e) => {
+            document.getElementById('mobilePayValue').textContent = e.target.value + '%';
+        });
+
+        document.getElementById('urbanRatio')?.addEventListener('input', (e) => {
+            document.getElementById('urbanRatioValue').textContent = e.target.value + '%';
+        });
+    </script>
+
+</body>
+</html>
