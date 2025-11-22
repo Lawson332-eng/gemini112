@@ -364,9 +364,10 @@ function get_app_button_styles() {
     /* 移动端响应式 - 按钮竖排且等距 */
     @media (max-width: 768px) {
         .custom-product-buttons-container {
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
+            flex-direction: column !important;
+            align-items: center !important;
+            gap: 0 !important;
+            margin-top: 15px !important;
         }
 
         .custom-product-buttons-container .ios-app-button,
@@ -376,10 +377,15 @@ function get_app_button_styles() {
         .custom-product-buttons-container .yith-ywraq-add-button {
             width: auto !important;
             min-width: 200px;
-            max-width: 100%;
+            max-width: 280px;
             text-align: center;
             flex: 0 0 auto;
-            margin: 0 !important;
+            margin: 0 0 12px 0 !important;
+        }
+
+        /* 最后一个按钮不需要底部间距 */
+        .custom-product-buttons-container .android-app-button {
+            margin-bottom: 0 !important;
         }
     }
 
