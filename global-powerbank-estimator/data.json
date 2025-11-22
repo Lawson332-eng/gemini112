@@ -1,0 +1,475 @@
+{
+  "countryDefaults": {
+    "china": {
+      "baseline": 212,
+      "mobilePay": 85,
+      "climate": "temperate",
+      "urbanRatio": 75,
+      "name_zh": "中国",
+      "name_en": "China"
+    },
+    "japan": {
+      "baseline": 250,
+      "mobilePay": 50,
+      "climate": "temperate",
+      "urbanRatio": 92,
+      "name_zh": "日本",
+      "name_en": "Japan"
+    },
+    "korea": {
+      "baseline": 250,
+      "mobilePay": 75,
+      "climate": "temperate",
+      "urbanRatio": 82,
+      "name_zh": "韩国",
+      "name_en": "South Korea"
+    },
+    "singapore": {
+      "baseline": 200,
+      "mobilePay": 90,
+      "climate": "tropical",
+      "urbanRatio": 100,
+      "name_zh": "新加坡",
+      "name_en": "Singapore"
+    },
+    "thailand": {
+      "baseline": 180,
+      "mobilePay": 60,
+      "climate": "tropical",
+      "urbanRatio": 50,
+      "name_zh": "泰国",
+      "name_en": "Thailand"
+    },
+    "vietnam": {
+      "baseline": 180,
+      "mobilePay": 55,
+      "climate": "tropical",
+      "urbanRatio": 38,
+      "name_zh": "越南",
+      "name_en": "Vietnam"
+    },
+    "malaysia": {
+      "baseline": 180,
+      "mobilePay": 65,
+      "climate": "tropical",
+      "urbanRatio": 77,
+      "name_zh": "马来西亚",
+      "name_en": "Malaysia"
+    },
+    "indonesia": {
+      "baseline": 180,
+      "mobilePay": 50,
+      "climate": "tropical",
+      "urbanRatio": 56,
+      "name_zh": "印度尼西亚",
+      "name_en": "Indonesia"
+    },
+    "usa": {
+      "baseline": 300,
+      "mobilePay": 30,
+      "climate": "temperate",
+      "urbanRatio": 83,
+      "name_zh": "美国",
+      "name_en": "United States"
+    },
+    "uk": {
+      "baseline": 300,
+      "mobilePay": 45,
+      "climate": "temperate",
+      "urbanRatio": 84,
+      "name_zh": "英国",
+      "name_en": "United Kingdom"
+    },
+    "germany": {
+      "baseline": 300,
+      "mobilePay": 40,
+      "climate": "temperate",
+      "urbanRatio": 77,
+      "name_zh": "德国",
+      "name_en": "Germany"
+    },
+    "france": {
+      "baseline": 300,
+      "mobilePay": 42,
+      "climate": "temperate",
+      "urbanRatio": 81,
+      "name_zh": "法国",
+      "name_en": "France"
+    },
+    "uae": {
+      "baseline": 350,
+      "mobilePay": 70,
+      "climate": "tropical",
+      "urbanRatio": 87,
+      "name_zh": "阿联酋",
+      "name_en": "UAE"
+    },
+    "others": {
+      "baseline": 320,
+      "mobilePay": 35,
+      "climate": "temperate",
+      "urbanRatio": 60,
+      "name_zh": "其他",
+      "name_en": "Others"
+    }
+  },
+  "referenceCities": [
+    {
+      "name_zh": "深圳",
+      "name_en": "Shenzhen",
+      "country": "china",
+      "population": 1798,
+      "area": 1997,
+      "gdp": 28000,
+      "malls": 12,
+      "urbanRatio": 89,
+      "mobilePay": 90
+    },
+    {
+      "name_zh": "东京",
+      "name_en": "Tokyo",
+      "country": "japan",
+      "population": 1396,
+      "area": 2194,
+      "gdp": 52000,
+      "malls": 15,
+      "urbanRatio": 100,
+      "mobilePay": 55
+    },
+    {
+      "name_zh": "新加坡",
+      "name_en": "Singapore",
+      "country": "singapore",
+      "population": 564,
+      "area": 733,
+      "gdp": 72000,
+      "malls": 8,
+      "urbanRatio": 100,
+      "mobilePay": 92
+    },
+    {
+      "name_zh": "首尔",
+      "name_en": "Seoul",
+      "country": "korea",
+      "population": 950,
+      "area": 605,
+      "gdp": 45000,
+      "malls": 10,
+      "urbanRatio": 100,
+      "mobilePay": 80
+    },
+    {
+      "name_zh": "曼谷",
+      "name_en": "Bangkok",
+      "country": "thailand",
+      "population": 1057,
+      "area": 1569,
+      "gdp": 12000,
+      "malls": 8,
+      "urbanRatio": 72,
+      "mobilePay": 65
+    },
+    {
+      "name_zh": "纽约",
+      "name_en": "New York",
+      "country": "usa",
+      "population": 842,
+      "area": 783,
+      "gdp": 95000,
+      "malls": 6,
+      "urbanRatio": 100,
+      "mobilePay": 35
+    },
+    {
+      "name_zh": "伦敦",
+      "name_en": "London",
+      "country": "uk",
+      "population": 900,
+      "area": 1572,
+      "gdp": 68000,
+      "malls": 5,
+      "urbanRatio": 95,
+      "mobilePay": 48
+    },
+    {
+      "name_zh": "迪拜",
+      "name_en": "Dubai",
+      "country": "uae",
+      "population": 342,
+      "area": 4114,
+      "gdp": 53000,
+      "malls": 4,
+      "urbanRatio": 100,
+      "mobilePay": 75
+    },
+    {
+      "name_zh": "上海",
+      "name_en": "Shanghai",
+      "country": "china",
+      "population": 2489,
+      "area": 6341,
+      "gdp": 27000,
+      "malls": 18,
+      "urbanRatio": 89,
+      "mobilePay": 88
+    },
+    {
+      "name_zh": "香港",
+      "name_en": "Hong Kong",
+      "country": "china",
+      "population": 748,
+      "area": 1106,
+      "gdp": 56000,
+      "malls": 9,
+      "urbanRatio": 100,
+      "mobilePay": 82
+    }
+  ],
+  "coefficients": {
+    "cityLevel": {
+      "mega": {
+        "min": 3.0,
+        "max": 4.5,
+        "default": 3.8,
+        "condition_zh": "> 1000万人",
+        "condition_en": "> 10M population"
+      },
+      "large": {
+        "min": 2.5,
+        "max": 3.5,
+        "default": 3.0,
+        "condition_zh": "500-1000万",
+        "condition_en": "5-10M"
+      },
+      "major": {
+        "min": 2.0,
+        "max": 2.8,
+        "default": 2.4,
+        "condition_zh": "300-500万",
+        "condition_en": "3-5M"
+      },
+      "medium": {
+        "min": 1.5,
+        "max": 2.2,
+        "default": 1.8,
+        "condition_zh": "100-300万",
+        "condition_en": "1-3M"
+      },
+      "small": {
+        "min": 1.0,
+        "max": 1.5,
+        "default": 1.2,
+        "condition_zh": "50-100万",
+        "condition_en": "0.5-1M"
+      },
+      "mini": {
+        "min": 0.6,
+        "max": 1.0,
+        "default": 0.8,
+        "condition_zh": "< 50万",
+        "condition_en": "< 0.5M"
+      }
+    },
+    "economic": {
+      "very_high": {
+        "min": 1.4,
+        "max": 1.6,
+        "default": 1.5,
+        "condition_zh": "> $50k",
+        "condition_en": "> $50k"
+      },
+      "high": {
+        "min": 1.2,
+        "max": 1.4,
+        "default": 1.3,
+        "condition_zh": "$30k-50k",
+        "condition_en": "$30k-50k"
+      },
+      "upper_middle": {
+        "min": 1.0,
+        "max": 1.2,
+        "default": 1.1,
+        "condition_zh": "$15k-30k",
+        "condition_en": "$15k-30k"
+      },
+      "middle": {
+        "min": 0.9,
+        "max": 1.1,
+        "default": 1.0,
+        "condition_zh": "$8k-15k",
+        "condition_en": "$8k-15k"
+      },
+      "low": {
+        "min": 0.7,
+        "max": 0.9,
+        "default": 0.8,
+        "condition_zh": "< $8k",
+        "condition_en": "< $8k"
+      }
+    },
+    "density": {
+      "ultra_high": {
+        "min": 1.3,
+        "max": 1.5,
+        "default": 1.4,
+        "condition_zh": "≥ 10000人/km²",
+        "condition_en": "≥ 10000/km²"
+      },
+      "high": {
+        "min": 1.2,
+        "max": 1.3,
+        "default": 1.25,
+        "condition_zh": "5000-10000",
+        "condition_en": "5000-10000"
+      },
+      "medium_high": {
+        "min": 1.1,
+        "max": 1.2,
+        "default": 1.15,
+        "condition_zh": "3000-5000",
+        "condition_en": "3000-5000"
+      },
+      "standard": {
+        "min": 1.0,
+        "max": 1.0,
+        "default": 1.0,
+        "condition_zh": "1500-3000",
+        "condition_en": "1500-3000"
+      },
+      "low": {
+        "min": 0.7,
+        "max": 0.9,
+        "default": 0.8,
+        "condition_zh": "< 1500",
+        "condition_en": "< 1500"
+      }
+    },
+    "commercial": {
+      "very_high": {
+        "min": 1.3,
+        "max": 1.5,
+        "default": 1.4,
+        "condition_zh": "> 10个商业体",
+        "condition_en": "> 10 malls"
+      },
+      "high": {
+        "min": 1.2,
+        "max": 1.3,
+        "default": 1.25,
+        "condition_zh": "6-10个",
+        "condition_en": "6-10"
+      },
+      "medium": {
+        "min": 1.0,
+        "max": 1.2,
+        "default": 1.1,
+        "condition_zh": "3-5个",
+        "condition_en": "3-5"
+      },
+      "low": {
+        "min": 0.8,
+        "max": 1.0,
+        "default": 0.9,
+        "condition_zh": "1-3个",
+        "condition_en": "1-3"
+      },
+      "very_low": {
+        "min": 0.5,
+        "max": 0.7,
+        "default": 0.6,
+        "condition_zh": "< 1个",
+        "condition_en": "< 1"
+      }
+    },
+    "mobilePay": {
+      "very_high": {
+        "min": 1.3,
+        "max": 1.5,
+        "default": 1.4,
+        "condition_zh": "> 80%",
+        "condition_en": "> 80%"
+      },
+      "high": {
+        "min": 1.1,
+        "max": 1.3,
+        "default": 1.2,
+        "condition_zh": "60-80%",
+        "condition_en": "60-80%"
+      },
+      "medium": {
+        "min": 1.0,
+        "max": 1.1,
+        "default": 1.05,
+        "condition_zh": "40-60%",
+        "condition_en": "40-60%"
+      },
+      "low": {
+        "min": 0.8,
+        "max": 1.0,
+        "default": 0.9,
+        "condition_zh": "20-40%",
+        "condition_en": "20-40%"
+      },
+      "very_low": {
+        "min": 0.5,
+        "max": 0.8,
+        "default": 0.65,
+        "condition_zh": "< 20%",
+        "condition_en": "< 20%"
+      }
+    },
+    "climate": {
+      "tropical": {
+        "min": 1.1,
+        "max": 1.3,
+        "default": 1.2,
+        "name_zh": "热带/亚热带",
+        "name_en": "Tropical/Subtropical"
+      },
+      "temperate": {
+        "min": 1.0,
+        "max": 1.1,
+        "default": 1.05,
+        "name_zh": "温带",
+        "name_en": "Temperate"
+      },
+      "cold": {
+        "min": 0.9,
+        "max": 1.0,
+        "default": 0.95,
+        "name_zh": "寒带/高原",
+        "name_en": "Cold/Highland"
+      }
+    },
+    "urbanRatio": {
+      "very_high": {
+        "min": 0.85,
+        "max": 0.95,
+        "default": 0.9,
+        "condition_zh": "> 90%城市化",
+        "condition_en": "> 90% urbanized"
+      },
+      "high": {
+        "min": 0.70,
+        "max": 0.85,
+        "default": 0.78,
+        "condition_zh": "70-90%",
+        "condition_en": "70-90%"
+      },
+      "medium": {
+        "min": 0.60,
+        "max": 0.75,
+        "default": 0.68,
+        "condition_zh": "50-70%",
+        "condition_en": "50-70%"
+      },
+      "low": {
+        "min": 0.50,
+        "max": 0.65,
+        "default": 0.58,
+        "condition_zh": "< 50%",
+        "condition_en": "< 50%"
+      }
+    }
+  }
+}
