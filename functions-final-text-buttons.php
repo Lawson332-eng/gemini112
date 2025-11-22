@@ -380,7 +380,7 @@ function get_app_button_styles() {
             max-width: 280px;
             text-align: center;
             flex: 0 0 auto;
-            margin: 0 0 12px 0 !important;
+            margin: 0 0 8px 0 !important;
         }
 
         /* 最后一个按钮不需要底部间距 */
