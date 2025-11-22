@@ -205,11 +205,22 @@ class PowerbankEstimator {
   }
 
   validateForm() {
-    const required = ['cityName', 'country', 'population', 'area', 'gdp', 'malls'];
-    return required.every(field => {
+    const requiredStrings = ['cityName', 'country'];
+    const requiredNumbers = ['population', 'area', 'gdp', 'malls'];
+
+    // Check string fields
+    const stringsValid = requiredStrings.every(field => {
+      const value = this.formData[field];
+      return value !== '' && value !== null && value !== undefined;
+    });
+
+    // Check number fields
+    const numbersValid = requiredNumbers.every(field => {
       const value = this.formData[field];
       return value !== '' && value !== null && value !== undefined && !isNaN(value);
     });
+
+    return stringsValid && numbersValid;
   }
 
   performCalculation(data) {
