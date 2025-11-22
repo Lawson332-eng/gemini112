@@ -208,17 +208,34 @@ class PowerbankEstimator {
     const requiredStrings = ['cityName', 'country'];
     const requiredNumbers = ['population', 'area', 'gdp', 'malls'];
 
+    console.log('=== Form Validation Debug ===');
+    console.log('Form Data:', this.formData);
+
     // Check string fields
-    const stringsValid = requiredStrings.every(field => {
+    const stringResults = {};
+    requiredStrings.forEach(field => {
       const value = this.formData[field];
-      return value !== '' && value !== null && value !== undefined;
+      const isValid = value !== '' && value !== null && value !== undefined;
+      stringResults[field] = { value, isValid };
+      console.log(`String field "${field}":`, value, '→', isValid);
     });
 
     // Check number fields
-    const numbersValid = requiredNumbers.every(field => {
+    const numberResults = {};
+    requiredNumbers.forEach(field => {
       const value = this.formData[field];
-      return value !== '' && value !== null && value !== undefined && !isNaN(value);
+      const isValid = value !== '' && value !== null && value !== undefined && !isNaN(value);
+      numberResults[field] = { value, isValid, isNaN: isNaN(value) };
+      console.log(`Number field "${field}":`, value, '→', isValid, '(isNaN:', isNaN(value), ')');
     });
+
+    const stringsValid = requiredStrings.every(field => stringResults[field].isValid);
+    const numbersValid = requiredNumbers.every(field => numberResults[field].isValid);
+
+    console.log('Strings valid:', stringsValid);
+    console.log('Numbers valid:', numbersValid);
+    console.log('Overall valid:', stringsValid && numbersValid);
+    console.log('=== End Validation Debug ===');
 
     return stringsValid && numbersValid;
   }
